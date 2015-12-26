@@ -67,8 +67,8 @@ class AddUserCommand extends ContainerAwareCommand
         $em->flush();
 
         $logger = $this->getContainer()->get('logger');
-        $logger->info('Creating user ' . $name . ' from command line');
+        $logger->info('Created user ' . $name . ' from command line');
 
-        $output->writeln($name);
+        $output->writeln('<info>Added user ' . $name . ' to database</info>');
     }
 }
