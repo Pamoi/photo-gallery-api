@@ -27,7 +27,7 @@ class DeleteUserCommand extends ContainerAwareCommand
         $name = $input->getArgument('name');
 
         $repository = $this->getContainer()->get('doctrine')->getRepository('AppBundle:User');
-        $user = $repository->findOneByUsername($name);
+        $user = $repository->loadUserByUsername($name);
 
         if (null === $user) {
             throw new \InvalidArgumentException('No user with name ' . $name . ' was found in the database');

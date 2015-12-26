@@ -4,13 +4,12 @@ namespace AppBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Security\Core\User\UserInterface;
-
+use Symfony\Component\Security\Core\User\AdvancedUserInterface;
 /**
  * @ORM\Table(name="app_users")
  * @ORM\Entity(repositoryClass="AppBundle\Entity\UserRepository")
  */
-class User implements UserInterface, \Serializable
+class User implements AdvancedUserInterface, \Serializable
 {
     public static $ROLE_ADMIN = 'ROLE_ADMIN';
     public static $ROLE_USER = 'ROLE_USER';
@@ -228,6 +227,26 @@ class User implements UserInterface, \Serializable
         return $this->isActive;
     }
 
+    public function isAccountNonExpired()
+    {
+        return true;
+    }
+
+    public function isAccountNonLocked()
+    {
+        return true;
+    }
+
+    public function isCredentialsNonExpired()
+    {
+        return true;
+    }
+
+    public function isEnabled()
+    {
+        return $this->isActive;
+    }
+
     /** @see \Serializable::serialize() */
     public function serialize()
     {
@@ -236,7 +255,8 @@ class User implements UserInterface, \Serializable
             $this->username,
             $this->password,
             $this->salt,
-            $this->roles
+            $this->roles,
+            $this->isActive
         ));
     }
 
@@ -248,7 +268,8 @@ class User implements UserInterface, \Serializable
             $this->username,
             $this->password,
             $this->salt,
-            $this->roles
+            $this->roles,
+            $this->isActive
             ) = unserialize($serialized);
     }
 }
