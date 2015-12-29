@@ -51,7 +51,7 @@ class UserController
         }
 
         $token = array(
-            'username' => $username
+            'username' => $user->getUsername()
         );
 
         $jwt = JWT::encode($token, $this->key);

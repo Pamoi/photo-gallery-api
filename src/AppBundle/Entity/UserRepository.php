@@ -7,7 +7,7 @@ use Symfony\Bridge\Doctrine\Security\User\UserLoaderInterface;
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 
 /**
- * @class UserRepository
+ * UserRepository
  *
  * Repository for the User entity.
  */
