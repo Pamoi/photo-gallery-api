@@ -7,3 +7,10 @@ services:
 #    service_name:
 #        class: AppBundle\Directory\ClassName
 #        arguments: ["@another_service_name", "plain_value", "%parameter_name%"]
+    app.jwt_authenticator:
+        class: AppBundle\Security\JWTAuthenticator
+        arguments: ["@doctrine.orm.entity_manager", "%secret%"]
+
+    app.user_controller:
+        class: AppBundle\Controller\UserController
+        arguments: ["@doctrine.orm.entity_manager", "@security.password_encoder", "%secret%"]

@@ -18,8 +18,14 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
 
+        login:
+            pattern: ^/authenticate$
+            stateless: true
+            anonymous: ~
+
         main:
             pattern: ^/
-            http_basic: ~
-            provider: db_users
             stateless: true
+            guard:
+                authenticators:
+                    - app.jwt_authenticator
