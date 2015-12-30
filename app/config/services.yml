@@ -14,3 +14,15 @@ services:
     app.user_controller:
         class: AppBundle\Controller\UserController
         arguments: ["@doctrine.orm.entity_manager", "@security.password_encoder", "%secret%"]
+
+    app.command.add_user:
+        class: AppBundle\Command\AddUserCommand
+        arguments: ["@doctrine.orm.entity_manager", "@security.password_encoder", "@logger"]
+        tags:
+            - { name: console.command }
+
+    app.command.delete_user:
+        class: AppBundle\Command\DeleteUserCommand
+        arguments: ["@doctrine.orm.entity_manager", "@logger"]
+        tags:
+            - { name: console.command }

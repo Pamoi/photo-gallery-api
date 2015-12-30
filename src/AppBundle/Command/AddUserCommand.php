@@ -3,13 +3,30 @@
 namespace AppBundle\Command;
 
 use AppBundle\Entity\User;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Doctrine\ORM\EntityManager;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class AddUserCommand extends ContainerAwareCommand
+class AddUserCommand extends Command
 {
+    private $em;
+    private $encoder;
+    private $logger;
+
+    public function __construct(EntityManager $entityManager,
+                                UserPasswordEncoderInterface $encoder, LoggerInterface $logger)
+    {
+        $this->em = $entityManager;
+        $this->encoder = $encoder;
+        $this->logger = $logger;
+
+        parent::__construct();
+    }
+
     protected function configure()
     {
         $this
@@ -51,8 +68,7 @@ class AddUserCommand extends ContainerAwareCommand
         }
 
         $user = new User();
-        $encoder = $this->getContainer()->get('security.password_encoder');
-        $hashedPassword = $encoder->encodePassword($user, $plainPassword);
+        $hashedPassword = $this->encoder->encodePassword($user, $plainPassword);
         $user->setPassword($hashedPassword);
 
         $user->setUsername($name);
@@ -62,12 +78,10 @@ class AddUserCommand extends ContainerAwareCommand
             $user->addRole($role);
         }
 
-        $em = $this->getContainer()->get('doctrine')->getManager();
-        $em->persist($user);
-        $em->flush();
+        $this->em->persist($user);
+        $this->em->flush();
 
-        $logger = $this->getContainer()->get('logger');
-        $logger->info('Created user ' . $name . ' from command line');
+        $this->logger->info('Created user ' . $name . ' from command line');
 
         $output->writeln('<info>Added user ' . $name . ' to database</info>');
     }

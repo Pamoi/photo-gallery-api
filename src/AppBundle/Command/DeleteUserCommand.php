@@ -2,13 +2,26 @@
 
 namespace AppBundle\Command;
 
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Doctrine\ORM\EntityManager;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class DeleteUserCommand extends ContainerAwareCommand
+class DeleteUserCommand extends Command
 {
+    private $em;
+    private $logger;
+
+    public function __construct(EntityManager $entityManager, LoggerInterface $logger)
+    {
+        $this->em = $entityManager;
+        $this->logger = $logger;
+
+        parent::__construct();
+    }
+
     protected function configure()
     {
         $this
@@ -26,19 +39,17 @@ class DeleteUserCommand extends ContainerAwareCommand
     {
         $name = $input->getArgument('name');
 
-        $repository = $this->getContainer()->get('doctrine')->getRepository('AppBundle:User');
+        $repository = $this->em->getRepository('AppBundle:User');
         $user = $repository->loadUserByUsername($name);
 
         if (null === $user) {
             throw new \InvalidArgumentException('No user with name ' . $name . ' was found in the database');
         }
 
-        $em = $this->getContainer()->get('doctrine')->getManager();
-        $em->remove($user);
-        $em->flush();
+        $this->em->remove($user);
+        $this->em->flush();
 
-        $logger = $this->getContainer()->get('logger');
-        $logger->info('Deleted user ' . $name . ' from command line');
+        $this->logger->info('Deleted user ' . $name . ' from command line');
 
         $output->writeln('<info>Deleted user ' . $name . ' from database</info>');
     }
