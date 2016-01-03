@@ -24,12 +24,12 @@ class Album
     private $authors;
 
     /**
-     * @ORM\OneToMany(targetEntity="Photo", mappedBy="album")
+     * @ORM\OneToMany(targetEntity="Photo", mappedBy="album", cascade={"persist", "remove"})
      */
     private $photos;
 
     /**
-     * @ORM\ManyToMany(targetEntity="Comment")
+     * @ORM\ManyToMany(targetEntity="Comment", cascade={"persist", "remove"})
      * @ORM\JoinTable(name="albums_comments",
      *      joinColumns={@ORM\JoinColumn(name="album_id", referencedColumnName="id")},
      *      inverseJoinColumns={@ORM\JoinColumn(name="comment_id", referencedColumnName="id", unique=true)}
@@ -52,6 +52,8 @@ class Album
         $this->authors = new ArrayCollection();
         $this->photos = new ArrayCollection();
         $this->comments = new ArrayCollection();
+        $this->date = new \DateTime();
+        $this->creationDate = new \DateTime();
     }
 
     /**

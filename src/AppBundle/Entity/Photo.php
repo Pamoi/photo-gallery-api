@@ -4,6 +4,7 @@ namespace AppBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints\DateTime;
 
 /**
  * @ORM\Table(name="photos")
@@ -29,7 +30,7 @@ class Photo
     private $album;
 
     /**
-     * @ORM\ManyToMany(targetEntity="Comment")
+     * @ORM\ManyToMany(targetEntity="Comment", cascade={"persist", "remove"})
      * @ORM\JoinTable(name="photos_comments",
      *      joinColumns={@ORM\JoinColumn(name="photo_id", referencedColumnName="id")},
      *      inverseJoinColumns={@ORM\JoinColumn(name="comment_id", referencedColumnName="id", unique=true)}
@@ -50,6 +51,8 @@ class Photo
     public function __construct()
     {
         $this->comments = new ArrayCollection();
+        $this->date = new \DateTime();
+        $this->uploadDate = new \DateTime();
     }
 
     /**
