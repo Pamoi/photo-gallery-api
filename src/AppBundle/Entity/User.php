@@ -227,6 +227,22 @@ class User implements AdvancedUserInterface, \Serializable
         return $this->isActive;
     }
 
+    /**
+     * Produces an array containing public data from this user, ready
+     * to be encoded as JSON.
+     *
+     * @return array
+     */
+    public function toJson()
+    {
+        $data = array(
+            'id' => $this->getId(),
+            'username' => $this->getUsername()
+        );
+
+        return $data;
+    }
+
     public function isAccountNonExpired()
     {
         return true;

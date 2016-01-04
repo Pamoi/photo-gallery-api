@@ -3,6 +3,7 @@
 namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Table(name="comments")
@@ -10,6 +11,13 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Comment
 {
+    /**
+     * @var DATE_FORMAT
+     *
+     * The format used to represent date and time in this class.
+     */
+    public static $DATE_FORMAT = 'd-m-Y H:i:s';
+
     /**
      * @ORM\Column(type="integer")
      * @ORM\Id
@@ -19,18 +27,31 @@ class Comment
 
     /**
      * @ORM\ManyToOne(targetEntity="User")
+     *
+     * @Assert\Valid()
      */
     private $author;
 
     /**
      * @ORM\Column(type="text")
+     *
+     * @Assert\Length(min=2, max=10000)
      */
     private $text;
 
     /**
      * @ORM\Column(type="datetime")
+     *
+     * @Assert\DateTime()
      */
     private $date;
+
+    /**
+     * @ORM\Column(type="datetime")
+     *
+     * @Assert\DateTime()
+     */
+    private $editDate;
 
     /**
      * Get id
@@ -112,5 +133,48 @@ class Comment
     public function getAuthor()
     {
         return $this->author;
+    }
+
+    /**
+     * Set editDate
+     *
+     * @param \DateTime $editDate
+     *
+     * @return Comment
+     */
+    public function setEditDate($editDate)
+    {
+        $this->editDate = $editDate;
+
+        return $this;
+    }
+
+    /**
+     * Get editDate
+     *
+     * @return \DateTime
+     */
+    public function getEditDate()
+    {
+        return $this->editDate;
+    }
+
+    /**
+     * Produces an array containing public data from this comment, ready
+     * to be encoded as JSON.
+     *
+     * @return array
+     */
+    public function toJson()
+    {
+        $data = array(
+            'id' => $this->getId(),
+            'date' => $this->getDate()->format(static::$DATE_FORMAT),
+            'editDate' => $this->getEditDate()->format(static::$DATE_FORMAT),
+            'author' => $this->getAuthor()->toJson(),
+            'text' => $this->getText()
+        );
+
+        return $data;
     }
 }

@@ -4,13 +4,21 @@ namespace AppBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Table(name="albums")
- * @ORM\Entity()
+ * @ORM\Entity(repositoryClass="AppBundle\Entity\AlbumRepository")
  */
 class Album
 {
+    /**
+     * @var DATE_FORMAT
+     *
+     * The format used to represent date and time in this class.
+     */
+    public static $DATE_FORMAT = 'd-m-Y H:i:s';
+
     /**
      * @ORM\Column(type="integer")
      * @ORM\Id
@@ -20,11 +28,30 @@ class Album
 
     /**
      * @ORM\ManyToMany(targetEntity="User")
+     *
+     * @Assert\Valid()
      */
     private $authors;
 
     /**
+     * @ORM\Column(type="string", length=60)
+     *
+     * @Assert\NotBlank()
+     * @Assert\Length(min=2, max=60)
+     */
+    private $title;
+
+    /**
+     * @ORM\Column(type="text")
+     *
+     * @Assert\Length(min=0, max=10000)
+     */
+    private $description;
+
+    /**
      * @ORM\OneToMany(targetEntity="Photo", mappedBy="album", cascade={"persist", "remove"})
+     *
+     * @Assert\Valid()
      */
     private $photos;
 
@@ -34,16 +61,22 @@ class Album
      *      joinColumns={@ORM\JoinColumn(name="album_id", referencedColumnName="id")},
      *      inverseJoinColumns={@ORM\JoinColumn(name="comment_id", referencedColumnName="id", unique=true)}
      *      )
+     *
+     * @Assert\Valid()
      */
     private $comments;
 
     /**
      * @ORM\Column(type="date")
+     *
+     * @Assert\DateTime()
      */
     private $date;
 
     /**
      * @ORM\Column(type="datetime")
+     *
+     * @Assert\DateTime()
      */
     private $creationDate;
 
@@ -214,5 +247,93 @@ class Album
     public function getComments()
     {
         return $this->comments;
+    }
+
+    /**
+     * Set title
+     *
+     * @param string $title
+     *
+     * @return Album
+     */
+    public function setTitle($title)
+    {
+        $this->title = $title;
+
+        return $this;
+    }
+
+    /**
+     * Get title
+     *
+     * @return string
+     */
+    public function getTitle()
+    {
+        return $this->title;
+    }
+
+    /**
+     * Set description
+     *
+     * @param string $description
+     *
+     * @return Album
+     */
+    public function setDescription($description)
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * Get description
+     *
+     * @return string
+     */
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
+    /**
+     * Produces an array containing public data from this album, ready
+     * to be encoded as JSON.
+     *
+     * @return array
+     */
+    public function toJson()
+    {
+        $photos = array();
+
+        foreach ($this->photos as $photo) {
+            $photos[] = $photo->toJson();
+        }
+
+        $comments = array();
+
+        foreach ($this->comments as $comment) {
+            $comments[] = $comment->toJson();
+        }
+
+        $authors = array();
+
+        foreach ($this->authors as $author) {
+            $authors[] = $author->toJson();
+        }
+
+        $data = array(
+            'id' => $this->getId(),
+            'title' => $this->getTitle(),
+            'description' => $this->getDescription(),
+            'date' => $this->getDate()->format(static::$DATE_FORMAT),
+            'creationDate' => $this->getCreationDate()->format(static::$DATE_FORMAT),
+            'authors' => $authors,
+            'photos' => $photos,
+            'comments' => $comments
+        );
+
+        return $data;
     }
 }
