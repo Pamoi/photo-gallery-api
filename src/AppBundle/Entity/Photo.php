@@ -2,22 +2,28 @@
 
 namespace AppBundle\Entity;
 
+use AppBundle\Util\ImagickPhotoResizer;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Table(name="photos")
  * @ORM\Entity()
+ * @ORM\HasLifecycleCallbacks()
  */
 class Photo
 {
     /**
-     * @var DATE_FORMAT
+     * @var string DATE_FORMAT
      *
      * The format used to represent date and time in this class.
      */
     public static $DATE_FORMAT = 'd-m-Y H:i:s';
+
+    private static $MIN_PREFIX = 'thumb-';
+    private static $RESIZED_PREFIX = 'resized-';
 
     /**
      * @ORM\Column(type="integer")
@@ -66,10 +72,36 @@ class Photo
     private $uploadDate;
 
     /**
+     * @ORM\Column(type="string", length=5)
+     */
+    private $extension;
+
+    /**
      * @Assert\Image(maxSize="12M")
      */
     private $file;
 
+    /**
+     * @var mixed temp variable used to store the photo's id and extension to delete
+     * files after the entity has been removed from database.
+     */
+    private $temp;
+
+    /**
+     * Validation constraint checking that the file is set if the photo is being created (id is null).
+     *
+     * @Assert\IsTrue(message="File must be set.")
+     */
+    public function isFileNotEmpty()
+    {
+        return null === $this->id ?
+            (null !== $this->getFile())
+            : true;
+    }
+
+    /**
+     * Photo constructor.
+     */
     public function __construct()
     {
         $this->comments = new ArrayCollection();
@@ -220,15 +252,49 @@ class Photo
     /**
      * Set file
      *
-     * @param File $file
+     * @param UploadedFile $file
      *
      * @return Photo
      */
-    public function setFile(File $file)
+    public function setFile(UploadedFile $file = null)
     {
         $this->file = $file;
 
         return $this;
+    }
+
+    /**
+     * Get file
+     *
+     * @return UploadedFile
+     */
+    public function getFile()
+    {
+        return $this->file;
+    }
+
+    /**
+     * Set extension
+     *
+     * @param string $extension
+     *
+     * @return Photo
+     */
+    public function setExtension($extension)
+    {
+        $this->extension = $extension;
+
+        return $this;
+    }
+
+    /**
+     * Get extension
+     *
+     * @return string
+     */
+    public function getExtension()
+    {
+        return $this->extension;
     }
 
     /**
@@ -250,9 +316,119 @@ class Photo
             'date' => $this->getDate()->format(static::$DATE_FORMAT),
             'uploadDate' => $this->getUploadDate()->format(static::$DATE_FORMAT),
             'author' => $this->getAuthor()->toJson(),
-            'comments' => $comments
+            'comments' => $comments,
+            'url' => $this->getUrl(),
+            'thumbUrl' => $this->getThumbUrl(),
+            'resizedUrl' => $this->getResizedUrl()
         );
 
         return $data;
+    }
+
+    /**
+     * @ORM\PrePersist()
+     * @ORM\PreUpdate()
+     */
+    public function saveExtension()
+    {
+        if (null !== $this->getFile()) {
+            $this->extension = $this->getFile()->guessExtension();
+        }
+    }
+
+    /**
+     * @ORM\PostPersist()
+     * @ORM\PostUpdate()
+     */
+    public function saveFile()
+    {
+        if (null === $this->getFile()) {
+            return;
+        }
+
+        $this->getFile()->move($this->getUploadRootDir(), $this->id . '.' . $this->extension);
+
+        $filename = $this->id . '.' . $this->extension;
+        $resizer = new ImagickPhotoResizer($this->getUploadRootDir() . $filename);
+
+        $resizer->resize($this->getUploadRootDir() . static::$RESIZED_PREFIX . $filename, 1000, 700);
+        $resizer->resizeToSquare($this->getUploadRootDir() . static::$MIN_PREFIX . $filename, 300);
+
+        $this->setFile(null);
+    }
+
+    /**
+     * @ORM\PreRemove()
+     */
+    public function storeFilenameForRemove()
+    {
+        $this->temp = $this->id . '.' . $this->extension;
+    }
+
+    /**
+     * @ORM\PostRemove()
+     */
+    public function removeFiles()
+    {
+        if (isset($this->temp)) {
+            $this->safeUnlink($this->getUploadRootDir() . $this->temp);
+            $this->safeUnlink($this->getUploadRootDir() . static::$MIN_PREFIX . $this->temp);
+            $this->safeUnlink($this->getUploadRootDir() . static::$RESIZED_PREFIX . $this->temp);
+        }
+    }
+
+    /**
+     * Get the public url to access this photo.
+     *
+     * @return null|string
+     */
+    public function getUrl()
+    {
+        return (null === $this->id OR null === $this->extension)
+            ? null
+            : $this->getUploadDir() . $this->id . '.' . $this->extension;
+    }
+
+    /**
+     * Get the url of a thumbnail of this photo.
+     *
+     * @return null|string
+     */
+    public function getThumbUrl()
+    {
+        return (null === $this->id OR null === $this->extension)
+            ? null
+            : $this->getUploadDir() . static::$MIN_PREFIX . $this->id . '.' . $this->extension;
+    }
+
+    /**
+     * Get the url of a sized down version of this photo.
+     *
+     * @return null|string
+     */
+    public function getResizedUrl()
+    {
+        return (null === $this->id OR null === $this->extension)
+            ? null
+            : $this->getUploadDir() . static::$RESIZED_PREFIX . $this->id . '.' . $this->extension;
+    }
+
+    protected function getUploadRootDir()
+    {
+        // the absolute directory path where uploaded
+        // documents should be saved
+        return __DIR__ . '/../../../web/' . $this->getUploadDir();
+    }
+
+    protected function getUploadDir()
+    {
+        return 'photos/';
+    }
+
+    protected function safeUnlink($filePath)
+    {
+        if (file_exists($filePath)) {
+            unlink($filePath);
+        }
     }
 }

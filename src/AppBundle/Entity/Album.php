@@ -191,6 +191,7 @@ class Album
     public function addPhoto(Photo $photo)
     {
         $this->photos[] = $photo;
+        $photo->setAlbum($this);
 
         return $this;
     }

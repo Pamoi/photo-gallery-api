@@ -3,11 +3,11 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\Album;
+use AppBundle\Util\Util;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 
 class AlbumController extends Controller
@@ -43,7 +43,7 @@ class AlbumController extends Controller
         } catch (\Exception $e) {
             return new JsonResponse(array(
                 'message' => 'Invalid arguments',
-                'list' => array('date: Unable to parse string')
+                'list' => array('date: Unable to parse string.')
             ));
         }
 
@@ -59,18 +59,7 @@ class AlbumController extends Controller
         $errors = $validator->validate($album);
 
         if (count($errors) > 0) {
-            $errorList = array();
-
-            foreach ($errors as $e) {
-                $errorList[] = $e->getPropertyPath() . ': ' . $e->getMessage();
-            }
-
-            $data = array(
-                'message' => 'Invalid arguments',
-                'list' => $errorList
-            );
-
-            return new JsonResponse($data, 422);
+            return new JsonResponse(Util::violationListToJson($errors), 422);
         }
 
         $em = $this->getDoctrine()->getEntityManager();
@@ -78,5 +67,24 @@ class AlbumController extends Controller
         $em->flush();
 
         return new JsonResponse($album->toJson());
+    }
+
+    /**
+     * @Route("/album/{id}", requirements={
+     *     "id": "\d+"
+     * })
+     * @Method("DELETE")
+     */
+    public function deleteAlbumAction(Request $request, Album $album)
+    {
+        if (!in_array($this->getUser(), $album->getAuthors()->toArray())) {
+            return new JsonResponse(array('message' => 'You are not allowed to delete this album.'), 403);
+        }
+
+        $em = $this->getDoctrine()->getEntityManager();
+        $em->remove($album);
+        $em->flush();
+
+        return new JsonResponse(array('message' => 'Album deleted.'));
     }
 }
