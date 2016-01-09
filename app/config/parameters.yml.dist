@@ -17,3 +17,6 @@ parameters:
 
     # A secret key that's used to generate certain security-related tokens
     secret:            ThisTokenIsNotSoSecretChangeIt
+
+    # Directory where the uploaded photos will be stored
+    photo_upload_dir: "%kernel.root_dir%/../web/photos"

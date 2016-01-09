@@ -26,3 +26,9 @@ services:
         arguments: ["@doctrine.orm.entity_manager", "@logger"]
         tags:
             - { name: console.command }
+
+    app.listener.photo_listener:
+        class: AppBundle\EventListener\PhotoListener
+        arguments: ["%photo_upload_dir%"]
+        tags:
+            - { name: doctrine.orm.entity_listener }
