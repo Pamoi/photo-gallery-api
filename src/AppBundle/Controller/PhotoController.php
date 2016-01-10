@@ -3,6 +3,7 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\Photo;
+use AppBundle\Entity\Comment;
 use AppBundle\Util\Util;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -136,5 +137,73 @@ class PhotoController extends Controller
         $em->flush();
 
         return new JsonResponse(array('message' => 'Photo deleted.'));
+    }
+
+    /**
+     * @Route("/photo/{id}/comment", requirements={
+     *     "id": "\d+"
+     * })
+     * @Method("POST")
+     */
+    public function commentPhotoAction(Request $request, Photo $photo)
+    {
+        $text = $request->get('text');
+
+        $comment = new Comment();
+        $comment->setText($text);
+        $comment->setAuthor($this->getUser());
+        $comment->setDate(new \DateTime());
+
+        $photo->addComment($comment);
+
+        $validator = $this->get('validator');
+        $errors = $validator->validate($photo);
+
+        if (count($errors) > 0) {
+            return new JsonResponse(Util::violationListToJson($errors));
+        }
+
+        $em = $this->getDoctrine()->getEntityManager();
+        $em->persist($comment);
+        $em->persist($photo);
+        $em->flush();
+
+        return new JsonResponse($photo->toJson());
+    }
+
+    /**
+     * @Route("/photo/{photoId}/comment/{commentId}", requirements={
+     *     "photoId": "\d+",
+     *     "commentId": "\d+"
+     * })
+     * @Method("DELETE")
+     */
+    public function deleteAlbumCommentAction(Request $request, $photoId, $commentId)
+    {
+        $em = $this->getDoctrine()->getEntityManager();
+        $photo = $em->getRepository('AppBundle:Photo')->findOneById($photoId);
+        $comment = $em->getRepository('AppBundle:Comment')->findOneById($commentId);
+
+        if (null === $photo) {
+            return new JsonResponse(array(
+                'message' => 'No photo with such id.'
+            ), 404);
+        }
+
+        if (null === $comment OR !$photo->getComments()->contains($comment)) {
+            return new JsonResponse(array(
+                'message' => 'This photo does not contain a comment with such id.'
+            ), 404);
+        }
+
+        $photo->removeComment($comment);
+
+        $em->remove($comment);
+        $em->persist($photo);
+        $em->flush();
+
+        return new JsonResponse(array(
+            'message' => 'Comment deleted.'
+        ));
     }
 }

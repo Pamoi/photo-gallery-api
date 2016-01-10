@@ -3,6 +3,7 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\Album;
+use AppBundle\Entity\Comment;
 use AppBundle\Util\Util;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -86,5 +87,73 @@ class AlbumController extends Controller
         $em->flush();
 
         return new JsonResponse(array('message' => 'Album deleted.'));
+    }
+
+    /**
+     * @Route("/album/{id}/comment", requirements={
+     *     "id": "\d+"
+     * })
+     * @Method("POST")
+     */
+    public function commentAlbumAction(Request $request, Album $album)
+    {
+        $text = $request->get('text');
+
+        $comment = new Comment();
+        $comment->setText($text);
+        $comment->setAuthor($this->getUser());
+        $comment->setDate(new \DateTime());
+
+        $album->addComment($comment);
+
+        $validator = $this->get('validator');
+        $errors = $validator->validate($album);
+
+        if (count($errors) > 0) {
+            return new JsonResponse(Util::violationListToJson($errors));
+        }
+
+        $em = $this->getDoctrine()->getEntityManager();
+        $em->persist($comment);
+        $em->persist($album);
+        $em->flush();
+
+        return new JsonResponse($album->toJson());
+    }
+
+    /**
+     * @Route("/album/{albumId}/comment/{commentId}", requirements={
+     *     "albumId": "\d+",
+     *     "commentId": "\d+"
+     * })
+     * @Method("DELETE")
+     */
+    public function deleteAlbumCommentAction(Request $request, $albumId, $commentId)
+    {
+        $em = $this->getDoctrine()->getEntityManager();
+        $album = $em->getRepository('AppBundle:Album')->findOneById($albumId);
+        $comment = $em->getRepository('AppBundle:Comment')->findOneById($commentId);
+
+        if (null === $album) {
+            return new JsonResponse(array(
+                'message' => 'No album with such id.'
+            ), 404);
+        }
+
+        if (null === $comment OR !$album->getComments()->contains($comment)) {
+            return new JsonResponse(array(
+                'message' => 'This album does not contain a comment with such id.'
+            ), 404);
+        }
+
+        $album->removeComment($comment);
+
+        $em->remove($comment);
+        $em->persist($album);
+        $em->flush();
+
+        return new JsonResponse(array(
+            'message' => 'Comment deleted.'
+        ));
     }
 }

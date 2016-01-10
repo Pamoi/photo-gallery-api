@@ -71,6 +71,7 @@ class Photo implements PublicJsonInterface
      * @ORM\Column(type="datetime")
      *
      * @Assert\DateTime()
+     * @Assert\NotNull()
      */
     private $date;
 
@@ -78,6 +79,7 @@ class Photo implements PublicJsonInterface
      * @ORM\Column(type="datetime")
      *
      * @Assert\DateTime()
+     * @Assert\NotNull()
      */
     private $uploadDate;
 

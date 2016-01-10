@@ -70,6 +70,7 @@ class Album implements PublicJsonInterface
      * @ORM\Column(type="date")
      *
      * @Assert\DateTime()
+     * @Assert\NotNull()
      */
     private $date;
 
@@ -77,6 +78,7 @@ class Album implements PublicJsonInterface
      * @ORM\Column(type="datetime")
      *
      * @Assert\DateTime()
+     * @Assert\NotNull()
      */
     private $creationDate;
 

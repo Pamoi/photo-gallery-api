@@ -42,12 +42,13 @@ class Comment implements PublicJsonInterface
     /**
      * @ORM\Column(type="datetime")
      *
+     * @Assert\NotNull()
      * @Assert\DateTime()
      */
     private $date;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="datetime", nullable=true)
      *
      * @Assert\DateTime()
      */
@@ -164,10 +165,12 @@ class Comment implements PublicJsonInterface
      */
     public function toJson()
     {
+        $editDate = $this->getEditDate() === null ? null : $this->getEditDate()->format(static::$DATE_FORMAT);
+
         $data = array(
             'id' => $this->getId(),
             'date' => $this->getDate()->format(static::$DATE_FORMAT),
-            'editDate' => $this->getEditDate()->format(static::$DATE_FORMAT),
+            'editDate' => $editDate,
             'author' => $this->getAuthor()->toJson(),
             'text' => $this->getText()
         );
