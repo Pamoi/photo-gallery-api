@@ -9,7 +9,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Table(name="comments")
  * @ORM\Entity()
  */
-class Comment
+class Comment implements PublicJsonInterface
 {
     /**
      * @var DATE_FORMAT
@@ -160,10 +160,7 @@ class Comment
     }
 
     /**
-     * Produces an array containing public data from this comment, ready
-     * to be encoded as JSON.
-     *
-     * @return array
+     * {@inheritdoc }
      */
     public function toJson()
     {

@@ -7,6 +7,7 @@ use AppBundle\Util\Util;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -18,11 +19,40 @@ class PhotoController extends Controller
      * })
      * @Method("GET")
      */
-    public function getPhotoAction(Request $request, $id)
+    public function getPhotoAction(Request $request, Photo $photo)
     {
-        return new JsonResponse(array(
-            'message' => 'Not implemented yet. You can access photos through their public URLs.'
-        ));
+        // Authorization logic to be added here
+
+        $uploadDir = $this->getParameter('photo_upload_dir');
+        return new BinaryFileResponse($uploadDir . '/' . $photo->getFilename());
+    }
+
+    /**
+     * @Route("/photo/thumb/{id}", requirements={
+     *     "id": "\d+"
+     * })
+     * @Method("GET")
+     */
+    public function getPhotoThumbnailAction(Request $request, Photo $photo)
+    {
+        // Authorization logic to be added here
+
+        $uploadDir = $this->getParameter('photo_upload_dir');
+        return new BinaryFileResponse($uploadDir . '/' . $photo->getThumbFilename());
+    }
+
+    /**
+     * @Route("/photo/resized/{id}", requirements={
+     *     "id": "\d+"
+     * })
+     * @Method("GET")
+     */
+    public function getPhotoResizedAction(Request $request, Photo $photo)
+    {
+        // Authorization logic to be added here
+
+        $uploadDir = $this->getParameter('photo_upload_dir');
+        return new BinaryFileResponse($uploadDir . '/' . $photo->getResizedFilename());
     }
 
     /**

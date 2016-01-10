@@ -12,7 +12,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity()
  * @ORM\EntityListeners({"AppBundle\EventListener\PhotoListener"})
  */
-class Photo
+class Photo implements PublicJsonInterface
 {
     /**
      * @var string $DATE_FORMAT
@@ -26,14 +26,14 @@ class Photo
      *
      * Prefix to append before the file name of the photo for the thumbnail version.
      */
-    public static $MIN_PREFIX = 'thumb-';
+    private static $MIN_PREFIX = 'thumb-';
 
     /**
      * @var string RESIZED_PREFIX
      *
      * Prefix to append before the file name of the photo for the resized version.
      */
-    public static $RESIZED_PREFIX = 'resized-';
+    private static $RESIZED_PREFIX = 'resized-';
 
     /**
      * @ORM\Column(type="integer")
@@ -92,10 +92,10 @@ class Photo
     private $file;
 
     /**
-     * @var mixed temp variable used to store the photo's id and extension to delete
-     * files after the entity has been removed from database.
+     * @var mixed temp variable used to store the photo's file names to delete
+     * them after the entity has been removed from database.
      */
-    private $tempFilename;
+    private $tempFileNames;
 
     /**
      * Validation constraint checking that the file is set if the photo is being created (id is null).
@@ -308,34 +308,33 @@ class Photo
     }
 
     /**
-     * Set tempFilename
-     *
-     * @param string $filename
+     * Store all names of the files used by this photo in a temporary variable.
      *
      * @return Photo
      */
-    public function setTempFilename($filename)
+    public function storeTempFileNames()
     {
-        $this->tempFilename = $filename;
+        $this->tempFileNames = array(
+            $this->getFilename(),
+            $this->getThumbFilename(),
+            $this->getResizedFilename()
+        );
 
         return $this;
     }
 
     /**
-     * Get tempFilename
+     * Get tempFileNames
      *
      * @return string
      */
-    public function getTempFilename()
+    public function getTempFileNames()
     {
-        return $this->tempFilename;
+        return $this->tempFileNames;
     }
 
     /**
-     * Produces an array containing public data from this photo, ready
-     * to be encoded as JSON.
-     *
-     * @return array
+     * {@inheritdoc }
      */
     public function toJson()
     {
@@ -351,59 +350,47 @@ class Photo
             'uploadDate' => $this->getUploadDate()->format(static::$DATE_FORMAT),
             'author' => $this->getAuthor()->toJson(),
             'comments' => $comments,
-            'url' => $this->getUrl(),
-            'thumbUrl' => $this->getThumbUrl(),
-            'resizedUrl' => $this->getResizedUrl()
+            'url' => '/photo/' . $this->id,
+            'thumbUrl' => '/photo/thumb/' . $this->id,
+            'resizedUrl' => '/photo/resized/' . $this->id
         );
 
         return $data;
     }
 
     /**
-     * Get the public url to access this photo.
+     * Get the file name of the original photo.
      *
      * @return null|string
      */
-    public function getUrl()
+    public function getFilename()
     {
         return (null === $this->id OR null === $this->extension)
             ? null
-            : $this->getUploadDir() . $this->id . '.' . $this->extension;
+            : $this->id . '.' . $this->extension;
     }
 
     /**
-     * Get the url of a thumbnail of this photo.
+     * Get the file name of the thumbnail of this photo.
      *
      * @return null|string
      */
-    public function getThumbUrl()
+    public function getThumbFilename()
     {
         return (null === $this->id OR null === $this->extension)
             ? null
-            : $this->getUploadDir() . static::$MIN_PREFIX . $this->id . '.' . $this->extension;
+            : static::$MIN_PREFIX . $this->id . '.' . $this->extension;
     }
 
     /**
-     * Get the url of a sized down version of this photo.
+     * Get the file name of a sized down version of this photo.
      *
      * @return null|string
      */
-    public function getResizedUrl()
+    public function getResizedFilename()
     {
         return (null === $this->id OR null === $this->extension)
             ? null
-            : $this->getUploadDir() . static::$RESIZED_PREFIX . $this->id . '.' . $this->extension;
-    }
-
-    protected function getUploadRootDir()
-    {
-        // the absolute directory path where uploaded
-        // documents should be saved
-        return __DIR__ . '/../../../web/' . $this->getUploadDir();
-    }
-
-    protected function getUploadDir()
-    {
-        return 'photos/';
+            : static::$RESIZED_PREFIX . $this->id . '.' . $this->extension;
     }
 }

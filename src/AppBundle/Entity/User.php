@@ -9,7 +9,7 @@ use Symfony\Component\Security\Core\User\AdvancedUserInterface;
  * @ORM\Table(name="app_users")
  * @ORM\Entity(repositoryClass="AppBundle\Entity\UserRepository")
  */
-class User implements AdvancedUserInterface, \Serializable
+class User implements AdvancedUserInterface, \Serializable, PublicJsonInterface
 {
     public static $ROLE_ADMIN = 'ROLE_ADMIN';
     public static $ROLE_USER = 'ROLE_USER';
@@ -228,10 +228,7 @@ class User implements AdvancedUserInterface, \Serializable
     }
 
     /**
-     * Produces an array containing public data from this user, ready
-     * to be encoded as JSON.
-     *
-     * @return array
+     * {@inheritdoc }
      */
     public function toJson()
     {

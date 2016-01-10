@@ -46,13 +46,12 @@ class PhotoListener
             return;
         }
 
-        $filename = $photo->getId() . '.' . $photo->getExtension();
-        $photo->getFile()->move($this->uploadRootDir, $filename);
+        $photo->getFile()->move($this->uploadRootDir, $photo->getFilename());
 
-        $resizer = new ImagickPhotoResizer($this->uploadRootDir . $filename);
+        $resizer = new ImagickPhotoResizer($this->uploadRootDir . $photo->getFilename());
 
-        $resizer->resize($this->uploadRootDir . Photo::$RESIZED_PREFIX . $filename, 1000, 700);
-        $resizer->resizeToSquare($this->uploadRootDir . Photo::$MIN_PREFIX . $filename, 300);
+        $resizer->resize($this->uploadRootDir . $photo->getResizedFilename(), 1000, 700);
+        $resizer->resizeToSquare($this->uploadRootDir . $photo->getThumbFilename(), 300);
 
         $photo->setFile(null);
     }
@@ -62,7 +61,7 @@ class PhotoListener
      */
     public function storeFilenameForRemove(Photo $photo, LifecycleEventArgs $event)
     {
-        $photo->setTempFilename($photo->getId() . '.' . $photo->getExtension());
+        $photo->storeTempFileNames();
     }
 
     /**
@@ -70,11 +69,11 @@ class PhotoListener
      */
     public function removeFiles(Photo $photo, LifecycleEventArgs $event)
     {
-        $filename = $photo->getTempFilename();
-        if (null !== $filename) {
-            $this->safeUnlink($this->uploadRootDir . $filename);
-            $this->safeUnlink($this->uploadRootDir . Photo::$MIN_PREFIX . $filename);
-            $this->safeUnlink($this->uploadRootDir . Photo::$RESIZED_PREFIX . $filename);
+        $fileNames = $photo->getTempFileNames();
+        if (is_array($fileNames)) {
+            foreach ($fileNames as $name) {
+                $this->safeUnlink($this->uploadRootDir . $name);
+            }
         }
     }
 

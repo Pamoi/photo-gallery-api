@@ -10,7 +10,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Table(name="albums")
  * @ORM\Entity(repositoryClass="AppBundle\Entity\AlbumRepository")
  */
-class Album
+class Album implements PublicJsonInterface
 {
     /**
      * @var DATE_FORMAT
@@ -299,10 +299,7 @@ class Album
     }
 
     /**
-     * Produces an array containing public data from this album, ready
-     * to be encoded as JSON.
-     *
-     * @return array
+     * {@inheritdoc }
      */
     public function toJson()
     {
