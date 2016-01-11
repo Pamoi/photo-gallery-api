@@ -55,6 +55,15 @@ class Comment implements PublicJsonInterface
     private $editDate;
 
     /**
+     * Comment constructor.
+     */
+    public function __construct()
+    {
+        $this->date = new \DateTime();
+        $this->editDate = null;
+    }
+
+    /**
      * Get id
      *
      * @return integer
