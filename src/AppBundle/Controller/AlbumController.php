@@ -43,9 +43,9 @@ class AlbumController extends Controller
             $date = new \DateTime($dateString);
         } catch (\Exception $e) {
             return new JsonResponse(array(
-                'message' => 'Invalid arguments',
+                'message' => 'Invalid arguments.',
                 'list' => array('date: Unable to parse string.')
-            ));
+            ), 422);
         }
 
         $album = new Album();
@@ -63,7 +63,7 @@ class AlbumController extends Controller
             return new JsonResponse(Util::violationListToJson($errors), 422);
         }
 
-        $em = $this->getDoctrine()->getEntityManager();
+        $em = $this->getDoctrine()->getManager();
         $em->persist($album);
         $em->flush();
 
@@ -82,7 +82,7 @@ class AlbumController extends Controller
             return new JsonResponse(array('message' => 'You are not allowed to delete this album.'), 403);
         }
 
-        $em = $this->getDoctrine()->getEntityManager();
+        $em = $this->getDoctrine()->getManager();
         $em->remove($album);
         $em->flush();
 
@@ -113,7 +113,7 @@ class AlbumController extends Controller
             return new JsonResponse(Util::violationListToJson($errors));
         }
 
-        $em = $this->getDoctrine()->getEntityManager();
+        $em = $this->getDoctrine()->getManager();
         $em->persist($comment);
         $em->persist($album);
         $em->flush();
@@ -130,7 +130,7 @@ class AlbumController extends Controller
      */
     public function deleteAlbumCommentAction(Request $request, $albumId, $commentId)
     {
-        $em = $this->getDoctrine()->getEntityManager();
+        $em = $this->getDoctrine()->getManager();
         $album = $em->getRepository('AppBundle:Album')->findOneById($albumId);
         $comment = $em->getRepository('AppBundle:Comment')->findOneById($commentId);
 

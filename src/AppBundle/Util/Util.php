@@ -27,7 +27,7 @@ class Util
         }
 
         $data = array(
-            'message' => 'Invalid arguments',
+            'message' => 'Invalid arguments.',
             'list' => $errorList
         );
 

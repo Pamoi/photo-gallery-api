@@ -26,4 +26,5 @@ doctrine:
         charset:  UTF8
 
 parameters:
-  secret: the_secret
+    secret: the_secret
+    photo_upload_dir: "%kernel.root_dir%/photos"

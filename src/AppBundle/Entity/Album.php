@@ -13,11 +13,18 @@ use Symfony\Component\Validator\Constraints as Assert;
 class Album implements PublicJsonInterface
 {
     /**
-     * @var DATE_FORMAT
+     * @var $DATE_FORMAT
+     *
+     * The format used to represent a date in this class.
+     */
+    public static $DATE_FORMAT = 'd-m-Y';
+
+    /**
+     * @var $DATETIME_FORMAT
      *
      * The format used to represent date and time in this class.
      */
-    public static $DATE_FORMAT = 'd-m-Y H:i:s';
+    public static $DATETIME_FORMAT = 'd-m-Y H:i:s';
 
     /**
      * @ORM\Column(type="integer")
@@ -328,7 +335,7 @@ class Album implements PublicJsonInterface
             'title' => $this->getTitle(),
             'description' => $this->getDescription(),
             'date' => $this->getDate()->format(static::$DATE_FORMAT),
-            'creationDate' => $this->getCreationDate()->format(static::$DATE_FORMAT),
+            'creationDate' => $this->getCreationDate()->format(static::$DATETIME_FORMAT),
             'authors' => $authors,
             'photos' => $photos,
             'comments' => $comments
