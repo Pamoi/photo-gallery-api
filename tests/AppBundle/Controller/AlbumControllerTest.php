@@ -119,7 +119,7 @@ class AlbumControllerTest extends CommandWebTestCase
 
         $client->request(
             'GET',
-            '/album',
+            '/album/list',
             array(),
             array(),
             array(
@@ -144,7 +144,7 @@ class AlbumControllerTest extends CommandWebTestCase
 
         $client->request(
             'GET',
-            '/album/2',
+            '/album/list/2',
             array(),
             array(),
             array(

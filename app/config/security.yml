@@ -6,6 +6,9 @@ security:
         AppBundle\Entity\User:
             algorithm: bcrypt
 
+    access_decision_manager:
+        strategy: unanimous
+
     # http://symfony.com/doc/current/book/security.html#where-do-users-come-from-user-providers
     providers:
         db_users:

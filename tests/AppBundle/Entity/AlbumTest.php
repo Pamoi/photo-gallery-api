@@ -5,7 +5,7 @@ namespace Tests\AppBundle\Entity;
 use AppBundle\Entity\Album;
 use AppBundle\Entity\User;
 
-class PhotoTest extends \PHPUnit_Framework_TestCase
+class AlbumTest extends \PHPUnit_Framework_TestCase
 {
     public function testConstruct()
     {
@@ -15,6 +15,7 @@ class PhotoTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('\DateTime', $album->getCreationDate());
         $this->assertInstanceOf('Doctrine\Common\Collections\ArrayCollection', $album->getPhotos());
         $this->assertInstanceOf('Doctrine\Common\Collections\ArrayCollection', $album->getComments());
+        $this->assertTrue($album->isPublic());
     }
 
     public function testToJson()
@@ -35,7 +36,7 @@ class PhotoTest extends \PHPUnit_Framework_TestCase
             'id' => 22,
             'title' => 'My title',
             'description' => 'Superb photos !',
-            'date' => '11-01-2016 00:00:00',
+            'date' => '11-01-2016',
             'creationDate' => '11-01-2016 06:06:06',
             'authors' => array(array(
                 'id' => 11,

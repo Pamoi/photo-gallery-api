@@ -14,12 +14,12 @@ use Symfony\Component\HttpFoundation\Request;
 class AlbumController extends Controller
 {
     /**
-     * @Route("/album/{page}", defaults={"page": 1}, requirements={
+     * @Route("/album/list/{page}", defaults={"page": 1}, requirements={
      *     "page": "\d+"
      * })
      * @Method("GET")
      */
-    public function getAlbumAction(Request $request, $page)
+    public function getAlbumListAction(Request $request, $page)
     {
         $repo = $this->getDoctrine()->getRepository('AppBundle:Album');
 
@@ -78,9 +78,8 @@ class AlbumController extends Controller
      */
     public function deleteAlbumAction(Request $request, Album $album)
     {
-        if (!in_array($this->getUser(), $album->getAuthors()->toArray())) {
-            return new JsonResponse(array('message' => 'You are not allowed to delete this album.'), 403);
-        }
+
+        $this->denyAccessUnlessGranted('delete', $album, 'You are not allowed to delete this album.');
 
         $em = $this->getDoctrine()->getManager();
         $em->remove($album);

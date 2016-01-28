@@ -89,6 +89,13 @@ class Album implements PublicJsonInterface
      */
     private $creationDate;
 
+    /**
+     * @ORM\Column(type="boolean")
+     *
+     * @Assert\Type(type="bool")
+     */
+    private $isPublic;
+
     public function __construct()
     {
         $this->authors = new ArrayCollection();
@@ -96,6 +103,7 @@ class Album implements PublicJsonInterface
         $this->comments = new ArrayCollection();
         $this->date = new \DateTime();
         $this->creationDate = new \DateTime();
+        $this->isPublic = true;
     }
 
     /**
@@ -305,6 +313,30 @@ class Album implements PublicJsonInterface
     public function getDescription()
     {
         return $this->description;
+    }
+
+    /**
+     * Set isPublic
+     *
+     * @param boolean $isPublic
+     *
+     * @return Album
+     */
+    public function setIsPublic($isPublic)
+    {
+        $this->isPublic = $isPublic;
+
+        return $this;
+    }
+
+    /**
+     * Get isPublic
+     *
+     * @return boolean
+     */
+    public function isPublic()
+    {
+        return $this->isPublic;
     }
 
     /**

@@ -11,6 +11,13 @@ services:
         class: AppBundle\Security\JWTAuthenticator
         arguments: ["@doctrine.orm.entity_manager", "%secret%"]
 
+    app.voter.album_voter:
+        class: AppBundle\Security\AlbumVoter
+        arguments: ['@security.access.decision_manager']
+        public: false
+        tags:
+            - { name: security.voter }
+
     app.user_controller:
         class: AppBundle\Controller\UserController
         arguments: ["@doctrine.orm.entity_manager", "@security.password_encoder", "%secret%"]
