@@ -10,6 +10,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class AlbumController extends Controller
 {
@@ -24,6 +25,12 @@ class AlbumController extends Controller
         $repo = $this->getDoctrine()->getRepository('AppBundle:Album');
 
         $albums = $repo->loadPage($page, 5);
+
+        if (count($albums) == 0) {
+            throw new NotFoundHttpException('There is no album at this page.');
+        }
+
+        $albums = array_filter($albums, function($a) { return $this->isGranted('view', $a); });
         $data = array_map(function($a) { return $a->toJson(); }, $albums);
 
         return new JsonResponse($data);
@@ -96,6 +103,8 @@ class AlbumController extends Controller
      */
     public function commentAlbumAction(Request $request, Album $album)
     {
+        $this->denyAccessUnlessGranted('comment', $album, 'You are not allowed to comment this album.');
+
         $text = $request->get('text');
 
         $comment = new Comment();
@@ -144,6 +153,8 @@ class AlbumController extends Controller
                 'message' => 'This album does not contain a comment with such id.'
             ), 404);
         }
+
+        $this->denyAccessUnlessGranted('delete', $comment, 'You are not allowed to delete this comment.');
 
         $album->removeComment($comment);
 

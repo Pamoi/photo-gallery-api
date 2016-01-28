@@ -152,11 +152,7 @@ class AlbumControllerTest extends CommandWebTestCase
             )
         );
 
-        $this->assertEquals(200, $client->getResponse()->getStatusCode());
-
-        $json = (array) json_decode($client->getResponse()->getContent());
-
-        $this->assertEquals(0, count($json));
+        $this->assertEquals(404, $client->getResponse()->getStatusCode());
     }
 
     /**

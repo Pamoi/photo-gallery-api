@@ -18,6 +18,20 @@ services:
         tags:
             - { name: security.voter }
 
+    app.voter.photo_voter:
+        class: AppBundle\Security\PhotoVoter
+        arguments: ['@security.access.decision_manager']
+        public: false
+        tags:
+            - { name: security.voter }
+
+    app.voter.comment_voter:
+        class: AppBundle\Security\CommentVoter
+        arguments: ['@security.access.decision_manager']
+        public: false
+        tags:
+            - { name: security.voter }
+
     app.user_controller:
         class: AppBundle\Controller\UserController
         arguments: ["@doctrine.orm.entity_manager", "@security.password_encoder", "%secret%"]

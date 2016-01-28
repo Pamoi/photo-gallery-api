@@ -22,7 +22,7 @@ class PhotoController extends Controller
      */
     public function getPhotoAction(Request $request, Photo $photo)
     {
-        // Authorization logic to be added here
+        $this->denyAccessUnlessGranted('view', $photo, 'You are not allowed to view this photo.');
 
         $uploadDir = $this->getParameter('photo_upload_dir');
         return new BinaryFileResponse($uploadDir . '/' . $photo->getFilename());
@@ -36,7 +36,7 @@ class PhotoController extends Controller
      */
     public function getPhotoThumbnailAction(Request $request, Photo $photo)
     {
-        // Authorization logic to be added here
+        $this->denyAccessUnlessGranted('view', $photo, 'You are not allowed to view this photo.');
 
         $uploadDir = $this->getParameter('photo_upload_dir');
         return new BinaryFileResponse($uploadDir . '/' . $photo->getThumbFilename());
@@ -50,7 +50,7 @@ class PhotoController extends Controller
      */
     public function getPhotoResizedAction(Request $request, Photo $photo)
     {
-        // Authorization logic to be added here
+        $this->denyAccessUnlessGranted('view', $photo, 'You are not allowed to view this photo.');
 
         $uploadDir = $this->getParameter('photo_upload_dir');
         return new BinaryFileResponse($uploadDir . '/' . $photo->getResizedFilename());
@@ -80,7 +80,7 @@ class PhotoController extends Controller
             $files = array($files);
         }
 
-        $em = $this->getDoctrine()->getEntityManager();
+        $em = $this->getDoctrine()->getManager();
         $album = $em->getRepository('AppBundle:Album')->findOneById($albumId);
 
         if (null === $album) {
@@ -123,15 +123,12 @@ class PhotoController extends Controller
      */
     public function deletePhotoAction(Request $request, Photo $photo)
     {
+        $this->denyAccessUnlessGranted('delete', $photo, 'You are not allowed to delete this photo.');
+
         $album = $photo->getAlbum();
-
-        if (!in_array($this->getUser(), $album->getAuthors()->toArray())) {
-            return new JsonResponse(array('message' => 'You are not allowed to delete this photo.'), 403);
-        }
-
         $album->removePhoto($photo);
 
-        $em = $this->getDoctrine()->getEntityManager();
+        $em = $this->getDoctrine()->getManager();
         $em->remove($photo);
         $em->persist($album);
         $em->flush();
@@ -147,6 +144,8 @@ class PhotoController extends Controller
      */
     public function commentPhotoAction(Request $request, Photo $photo)
     {
+        $this->denyAccessUnlessGranted('comment', $photo, 'You are not allowed to comment this photo.');
+
         $text = $request->get('text');
 
         $comment = new Comment();
@@ -163,7 +162,7 @@ class PhotoController extends Controller
             return new JsonResponse(Util::violationListToJson($errors));
         }
 
-        $em = $this->getDoctrine()->getEntityManager();
+        $em = $this->getDoctrine()->getManager();
         $em->persist($comment);
         $em->persist($photo);
         $em->flush();
@@ -180,7 +179,7 @@ class PhotoController extends Controller
      */
     public function deleteAlbumCommentAction(Request $request, $photoId, $commentId)
     {
-        $em = $this->getDoctrine()->getEntityManager();
+        $em = $this->getDoctrine()->getManager();
         $photo = $em->getRepository('AppBundle:Photo')->findOneById($photoId);
         $comment = $em->getRepository('AppBundle:Comment')->findOneById($commentId);
 
@@ -195,6 +194,8 @@ class PhotoController extends Controller
                 'message' => 'This photo does not contain a comment with such id.'
             ), 404);
         }
+
+        $this->denyAccessUnlessGranted('delete', $comment, 'You are not allowed to delete this comment.');
 
         $photo->removeComment($comment);
 
