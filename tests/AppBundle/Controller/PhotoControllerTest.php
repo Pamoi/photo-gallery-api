@@ -9,11 +9,17 @@ class PhotoControllerTest extends CommandWebTestCase
 {
     private static $token;
     private static $uploadDir;
+    private static $albumId;
+    private static $photoId;
+    private static $commentId;
 
     public static function setUpBeforeClass()
     {
         self::$uploadDir = self::getApplication()->getKernel()->getContainer()->getParameter('photo_upload_dir');
-        mkdir(self::$uploadDir);
+
+        if (!file_exists(self::$uploadDir)) {
+            mkdir(self::$uploadDir);
+        }
 
         self::runCommand('doctrine:database:drop --force');
         self::runCommand('doctrine:database:create');
@@ -30,7 +36,15 @@ class PhotoControllerTest extends CommandWebTestCase
 
     public static function tearDownAfterClass()
     {
-        rmdir(static::$uploadDir);
+        $dir = self::$uploadDir;
+        $it = new \RecursiveDirectoryIterator($dir);
+        $it = new \RecursiveIteratorIterator($it, \RecursiveIteratorIterator::CHILD_FIRST);
+        foreach($it as $file) {
+            if ('.' === $file->getBasename() || '..' ===  $file->getBasename()) continue;
+            if ($file->isDir()) rmdir($file->getPathname());
+            else unlink($file->getPathname());
+        }
+        rmdir($dir);
     }
 
     public function testPostSinglePhoto()
@@ -53,25 +67,28 @@ class PhotoControllerTest extends CommandWebTestCase
         );
 
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
-        $albumId = json_decode($client->getResponse()->getContent())->id;
+        static::$albumId = json_decode($client->getResponse()->getContent())->id;
 
         // Upload a photo
+        $copyPath = 'photo.jpg';
+        copy(__DIR__ . '/test_file.jpg', $copyPath);
+
         $client->request(
             'POST',
             '/photo',
             array(
-                'albumId' => $albumId,
+                'albumId' => static::$albumId,
                 'date' => '12-01-2016',
-                'photo' => new UploadedFile(__DIR__ . '/test_file.jpg', 'photo.jpg')
             ),
-            array(),
+            array(
+                'photo' => new UploadedFile($copyPath, 'photo.jpg')
+            ),
             array(
                 'HTTP_X_AUTH_TOKEN' => self::$token
             )
         );
 
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
-        echo $client->getResponse()->getContent();
 
         // Get the album back
         $client->request(
@@ -88,5 +105,196 @@ class PhotoControllerTest extends CommandWebTestCase
         $json = json_decode($client->getResponse()->getContent(), true);
 
         $this->assertEquals(1, count($json[0]['photos']));
+        self::$photoId = $json[0]['photos'][0]['id'];
+
+        // Get the photo back
+        $client->request(
+            'GET',
+            '/photo/' . self::$photoId,
+            array(),
+            array(),
+            array(
+                'HTTP_X_AUTH_TOKEN' => self::$token
+            )
+        );
+
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+        $this->assertEquals('image/jpeg', $client->getResponse()->headers->get('Content-Type'));
+
+        // Get thumbnail and resized versions
+        $client->request(
+            'GET',
+            '/photo/' . self::$photoId . '/thumb',
+            array(),
+            array(),
+            array(
+                'HTTP_X_AUTH_TOKEN' => self::$token
+            )
+        );
+
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+        $this->assertEquals('image/jpeg', $client->getResponse()->headers->get('Content-Type'));
+
+        $client->request(
+            'GET',
+            '/photo/' . self::$photoId . '/resized',
+            array(),
+            array(),
+            array(
+                'HTTP_X_AUTH_TOKEN' => self::$token
+            )
+        );
+
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+        $this->assertEquals('image/jpeg', $client->getResponse()->headers->get('Content-Type'));
+    }
+
+    /**
+     * @depends testPostSinglePhoto
+     */
+    public function testPostMultiplePhotos()
+    {
+        $client = static::createClient();
+
+        $copyPath1 = 'photo1.jpg';
+        copy(__DIR__ . '/test_file.jpg', $copyPath1);
+        $copyPath2 = 'photo2.jpg';
+        copy(__DIR__ . '/test_file.jpg', $copyPath2);
+
+        $client->request(
+            'POST',
+            '/photo',
+            array(
+                'albumId' => static::$albumId,
+                'date' => '12-01-2016',
+            ),
+            array(
+                'photo' => array(
+                    new UploadedFile($copyPath1, 'photo.jpg'),
+                    new UploadedFile($copyPath2, 'photo2.jpg'))
+            ),
+            array(
+                'HTTP_X_AUTH_TOKEN' => self::$token
+            )
+        );
+
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+
+        $client->request(
+            'GET',
+            '/album/list',
+            array(),
+            array(),
+            array(
+                'HTTP_X_AUTH_TOKEN' => self::$token
+            )
+        );
+
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+        $json = json_decode($client->getResponse()->getContent(), true);
+
+        $this->assertEquals(3, count($json[0]['photos']));
+    }
+
+    /**
+     * @depends testPostSinglePhoto
+     */
+    public function testCommentPhoto()
+    {
+        $client = static::createClient();
+
+        $client->request(
+            'POST',
+            '/photo/' . self::$photoId . '/comment',
+            array(
+                'text' => 'Hello there'
+            ),
+            array(),
+            array(
+                'HTTP_X_AUTH_TOKEN' => self::$token
+            )
+        );
+
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+
+        $client->request(
+            'GET',
+            '/album/list',
+            array(),
+            array(),
+            array(
+                'HTTP_X_AUTH_TOKEN' => self::$token
+            )
+        );
+
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+        $json = json_decode($client->getResponse()->getContent(), true);
+
+        $this->assertEquals('Hello there', $json[0]['photos'][0]['comments'][0]['text']);
+        self::$commentId = $json[0]['photos'][0]['comments'][0]['id'];
+    }
+
+    public function testDeletePhotoComment()
+    {
+        $client = static::createClient();
+
+        $client->request(
+            'DELETE',
+            '/photo/' . self::$photoId . '/comment/' . self::$commentId,
+            array(),
+            array(),
+            array(
+                'HTTP_X_AUTH_TOKEN' => self::$token
+            )
+        );
+
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+
+        $client->request(
+            'GET',
+            '/album/list',
+            array(),
+            array(),
+            array(
+                'HTTP_X_AUTH_TOKEN' => self::$token
+            )
+        );
+
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+        $json = json_decode($client->getResponse()->getContent(), true);
+
+        $this->assertEquals(0, count($json[0]['photos'][0]['comments']));
+    }
+
+    public function testDeletePhoto()
+    {
+        $client = static::createClient();
+
+        $client->request(
+            'DELETE',
+            '/photo/' . self::$photoId,
+            array(),
+            array(),
+            array(
+                'HTTP_X_AUTH_TOKEN' => self::$token
+            )
+        );
+
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+
+        $client->request(
+            'GET',
+            '/album/list',
+            array(),
+            array(),
+            array(
+                'HTTP_X_AUTH_TOKEN' => self::$token
+            )
+        );
+
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+        $json = json_decode($client->getResponse()->getContent(), true);
+
+        $this->assertEquals(2, count($json[0]['photos']));
     }
 }

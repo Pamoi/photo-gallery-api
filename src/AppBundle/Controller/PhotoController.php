@@ -29,7 +29,7 @@ class PhotoController extends Controller
     }
 
     /**
-     * @Route("/photo/thumb/{id}", requirements={
+     * @Route("/photo/{id}/thumb", requirements={
      *     "id": "\d+"
      * })
      * @Method("GET")
@@ -43,7 +43,7 @@ class PhotoController extends Controller
     }
 
     /**
-     * @Route("/photo/resized/{id}", requirements={
+     * @Route("/photo/{id}/resized", requirements={
      *     "id": "\d+"
      * })
      * @Method("GET")
