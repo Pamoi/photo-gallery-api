@@ -62,8 +62,8 @@ class PhotoController extends Controller
      */
     public function postPhotoAction(Request $request)
     {
-        $albumId = $request->get('albumId');
-        $dateString = $request->get('date');
+        $albumId = $request->request->get('albumId');
+        $dateString = $request->request->get('date');
         $files = $request->files->get('photo', array());
 
         try {
@@ -72,7 +72,7 @@ class PhotoController extends Controller
             return new JsonResponse(array(
                 'message' => 'Invalid arguments',
                 'list' => array('date: Unable to parse string.')
-            ));
+            ), 422);
         }
 
         // Create an array if only one photo was uploaded
@@ -89,7 +89,7 @@ class PhotoController extends Controller
                 'list' => array('albumId: no album with such id.')
             );
 
-            return new JsonResponse($data);
+            return new JsonResponse($data, 422);
         }
 
         foreach ($files as $file) {

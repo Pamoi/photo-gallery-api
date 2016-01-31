@@ -27,4 +27,4 @@ doctrine:
 
 parameters:
     secret: the_secret
-    photo_upload_dir: "%kernel.root_dir%/photos"
+    photo_upload_dir: "%kernel.root_dir%/../test_photo_dir"
