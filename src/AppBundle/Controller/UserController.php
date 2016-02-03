@@ -27,7 +27,24 @@ class UserController
     }
 
     /**
-     * @Route("/authenticate", name="authentication")
+     * @Route("/user/list")
+     * @Method("GET")
+     */
+    public function getUserListAction(Request $request)
+    {
+        $users = $this->em->getRepository('AppBundle:User')->findAll();
+
+        $data = array();
+
+        foreach ($users as $user) {
+            $data[] = $user->toJson();
+        }
+
+        return new JsonResponse($data);
+    }
+
+    /**
+     * @Route("/authenticate")
      * @Method("POST")
      */
     public function authenticateAction(Request $request)

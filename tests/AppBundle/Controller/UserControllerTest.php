@@ -6,12 +6,21 @@ use Firebase\JWT\JWT;
 
 class UserControllerTest extends CommandWebTestCase
 {
+    private static $token;
+
     public static function setUpBeforeClass()
     {
         self::runCommand('doctrine:database:drop --force');
         self::runCommand('doctrine:database:create');
         self::runCommand('doctrine:schema:update --force');
         self::runCommand('user:add toto toto@example.com pwd123');
+
+        $payload = array(
+            'username' => 'toto'
+        );
+
+        $secret = self::getApplication()->getKernel()->getContainer()->getParameter('secret');
+        self::$token = JWT::encode($payload, $secret);
     }
 
     public function testAuthenticate()
@@ -30,8 +39,7 @@ class UserControllerTest extends CommandWebTestCase
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
 
         $data = (array) json_decode($client->getResponse()->getContent());
-        $token = (array) JWT::decode($data['token'], 'the_secret', array('HS256'));
-        $this->assertEquals('toto', $token['username']);
+        $this->assertEquals(self::$token, $data['token']);
     }
 
     public function testInvalidCredentials()
@@ -69,8 +77,7 @@ class UserControllerTest extends CommandWebTestCase
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
 
         $data = (array) json_decode($client->getResponse()->getContent());
-        $token = (array) JWT::decode($data['token'], 'the_secret', array('HS256'));
-        $this->assertEquals('toto', $token['username']);
+        $this->assertEquals(self::$token, $data['token']);
     }
 
     public function testAuthenticationToken()
@@ -138,5 +145,26 @@ class UserControllerTest extends CommandWebTestCase
 
         $data = (array) json_decode($client->getResponse()->getContent());
         $this->assertEquals('No token provided', $data['message']);
+    }
+
+    public function testGetUserList()
+    {
+        $client = static::createClient();
+
+        $client->request(
+            'GET',
+            '/user/list',
+            array(),
+            array(),
+            array(
+                'HTTP_X_AUTH_TOKEN' => self::$token
+            )
+        );
+
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(1, count($data));
+        $this->assertEquals('toto', $data[0]['username']);
     }
 }
