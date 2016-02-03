@@ -12,10 +12,12 @@ class AlbumControllerTest extends CommandWebTestCase
 
     public static function setUpBeforeClass()
     {
+        self::freeApplication();
         self::runCommand('doctrine:database:drop --force');
         self::runCommand('doctrine:database:create');
         self::runCommand('doctrine:schema:update --force');
         self::runCommand('user:add toto toto@example.com pwd123');
+        self::runCommand('user:add titi titi@example.com pwd123');
 
         $payload = array(
             'username' => 'toto'
@@ -36,6 +38,7 @@ class AlbumControllerTest extends CommandWebTestCase
                 'title' => 'The title',
                 'description' => 'I am a description',
                 'date' => '12-01-2016',
+                'authorsIds' => '2'
             ),
             array(),
             array(
@@ -56,6 +59,7 @@ class AlbumControllerTest extends CommandWebTestCase
         $this->assertEquals(0, count($album['photos']));
         $this->assertEquals(0, count($album['comments']));
         $this->assertEquals('toto', $album['authors'][0]->username);
+        $this->assertEquals(2, count($album['authors']));
     }
 
     public function testInvalidPostAlbum()

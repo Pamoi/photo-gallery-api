@@ -28,4 +28,9 @@ class CommandWebTestCase extends WebTestCase
 
         return self::$application;
     }
+
+    protected static function freeApplication()
+    {
+        self::$application = null;
+    }
 }

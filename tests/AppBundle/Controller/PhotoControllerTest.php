@@ -15,6 +15,7 @@ class PhotoControllerTest extends CommandWebTestCase
 
     public static function setUpBeforeClass()
     {
+        self::freeApplication();
         self::$uploadDir = self::getApplication()->getKernel()->getContainer()->getParameter('photo_upload_dir');
 
         if (!file_exists(self::$uploadDir)) {
@@ -36,6 +37,7 @@ class PhotoControllerTest extends CommandWebTestCase
 
     public static function tearDownAfterClass()
     {
+        // Recursive deletion of upload directory
         $dir = self::$uploadDir;
         $it = new \RecursiveDirectoryIterator($dir);
         $it = new \RecursiveIteratorIterator($it, \RecursiveIteratorIterator::CHILD_FIRST);

@@ -10,6 +10,7 @@ class UserControllerTest extends CommandWebTestCase
 
     public static function setUpBeforeClass()
     {
+        self::freeApplication();
         self::runCommand('doctrine:database:drop --force');
         self::runCommand('doctrine:database:create');
         self::runCommand('doctrine:schema:update --force');

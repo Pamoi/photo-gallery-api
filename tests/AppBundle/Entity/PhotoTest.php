@@ -66,9 +66,6 @@ class PhotoTest extends \PHPUnit_Framework_TestCase
                 'username' => 'Toto'
             ),
             'comments' => array(),
-            'url' => '/photo/22',
-            'thumbUrl' => '/photo/thumb/22',
-            'resizedUrl' => '/photo/resized/22'
         );
 
         $this->assertEquals($correct, $photo->toJson());
