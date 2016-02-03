@@ -42,9 +42,10 @@ class AlbumController extends Controller
      */
     public function postAlbumAction(Request $request)
     {
-        $title = $request->get('title');
-        $description = $request->get('description');
-        $dateString = $request->get('date');
+        $title = $request->request->get('title');
+        $description = $request->request->get('description');
+        $dateString = $request->request->get('date');
+        $authorsIds = explode(',', $request->request->get('authorsIds'));
 
         try {
             $date = new \DateTime($dateString);
@@ -55,6 +56,7 @@ class AlbumController extends Controller
             ), 422);
         }
 
+        $em = $this->getDoctrine()->getManager();
         $album = new Album();
 
         $album->setTitle($title);
@@ -63,6 +65,12 @@ class AlbumController extends Controller
         $album->setCreationDate(new \DateTime());
         $album->addAuthor($this->getUser());
 
+        $authors = $em->getRepository('AppBundle:User')->findById($authorsIds);
+
+        foreach ($authors as $author) {
+            $album->addAuthor($author);
+        }
+
         $validator = $this->get('validator');
         $errors = $validator->validate($album);
 
@@ -70,7 +78,6 @@ class AlbumController extends Controller
             return new JsonResponse(Util::violationListToJson($errors), 422);
         }
 
-        $em = $this->getDoctrine()->getManager();
         $em->persist($album);
         $em->flush();
 
@@ -85,7 +92,6 @@ class AlbumController extends Controller
      */
     public function deleteAlbumAction(Request $request, Album $album)
     {
-
         $this->denyAccessUnlessGranted('delete', $album, 'You are not allowed to delete this album.');
 
         $em = $this->getDoctrine()->getManager();

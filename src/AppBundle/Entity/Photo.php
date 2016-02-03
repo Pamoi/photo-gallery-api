@@ -352,9 +352,6 @@ class Photo implements PublicJsonInterface
             'uploadDate' => $this->getUploadDate()->format(static::$DATE_FORMAT),
             'author' => $this->getAuthor()->toJson(),
             'comments' => $comments,
-            'url' => '/photo/' . $this->id,
-            'thumbUrl' => '/photo/thumb/' . $this->id,
-            'resizedUrl' => '/photo/resized/' . $this->id
         );
 
         return $data;

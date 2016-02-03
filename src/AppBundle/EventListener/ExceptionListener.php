@@ -4,24 +4,18 @@ namespace AppBundle\EventListener;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 class ExceptionListener
 {
     public function onKernelException(GetResponseForExceptionEvent $event)
     {
         $exception = $event->getException();
-
         $response = new JsonResponse();
 
-        if ($exception instanceof NotFoundHttpException) {
-            $response->setStatusCode(JsonResponse::HTTP_NOT_FOUND);
-            $response->setData(array(
-                'message' => 'Resource not found.'
-            ));
-        } else if ($exception instanceof AccessDeniedHttpException) {
-            $response->setStatusCode(JsonResponse::HTTP_FORBIDDEN);
+        if ($exception instanceof HttpExceptionInterface) {
+            $response->setStatusCode($exception->getStatusCode());
+            $response->headers->replace($exception->getHeaders());
             $response->setData(array(
                 'message' => $exception->getMessage()
             ));

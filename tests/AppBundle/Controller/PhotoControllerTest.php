@@ -234,6 +234,9 @@ class PhotoControllerTest extends CommandWebTestCase
         self::$commentId = $json[0]['photos'][0]['comments'][0]['id'];
     }
 
+    /**
+     * @depends testCommentPhoto
+     */
     public function testDeletePhotoComment()
     {
         $client = static::createClient();
@@ -266,6 +269,9 @@ class PhotoControllerTest extends CommandWebTestCase
         $this->assertEquals(0, count($json[0]['photos'][0]['comments']));
     }
 
+    /**
+     * @depends testDeletePhotoComment
+     */
     public function testDeletePhoto()
     {
         $client = static::createClient();

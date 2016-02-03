@@ -92,6 +92,8 @@ class PhotoController extends Controller
             return new JsonResponse($data, 422);
         }
 
+        $this->denyAccessUnlessGranted('edit', $album, 'You cannot add photos to this album.');
+
         foreach ($files as $file) {
             $photo = new Photo();
             $photo->setDate($date)
