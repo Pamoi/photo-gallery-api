@@ -1,4 +1,4 @@
 photo-gallery-api
 =================
 
-A Symfony project created on December 21, 2015, 12:07 pm.
+A simple REST API built with Symfony serving as backend for a photo sharing app and website.
