@@ -18,7 +18,7 @@ class PhotoController extends Controller
      * @Route("/photo/{id}", requirements={
      *     "id": "\d+"
      * })
-     * @Method("GET")
+     * @Method({"GET", "OPTIONS"})
      */
     public function getPhotoAction(Request $request, Photo $photo)
     {
@@ -32,7 +32,7 @@ class PhotoController extends Controller
      * @Route("/photo/{id}/thumb", requirements={
      *     "id": "\d+"
      * })
-     * @Method("GET")
+     * @Method({"GET", "OPTIONS"})
      */
     public function getPhotoThumbnailAction(Request $request, Photo $photo)
     {
@@ -46,7 +46,7 @@ class PhotoController extends Controller
      * @Route("/photo/{id}/resized", requirements={
      *     "id": "\d+"
      * })
-     * @Method("GET")
+     * @Method({"GET", "OPTIONS"})
      */
     public function getPhotoResizedAction(Request $request, Photo $photo)
     {
@@ -58,7 +58,7 @@ class PhotoController extends Controller
 
     /**
      * @Route("/photo")
-     * @Method("POST")
+     * @Method({"POST", "OPTIONS"})
      */
     public function postPhotoAction(Request $request)
     {
@@ -121,7 +121,7 @@ class PhotoController extends Controller
      * @Route("/photo/{id}", requirements={
      *     "id": "\d+"
      * })
-     * @Method("DELETE")
+     * @Method({"DELETE", "OPTIONS"})
      */
     public function deletePhotoAction(Request $request, Photo $photo)
     {
@@ -142,7 +142,7 @@ class PhotoController extends Controller
      * @Route("/photo/{id}/comment", requirements={
      *     "id": "\d+"
      * })
-     * @Method("POST")
+     * @Method({"POST", "OPTIONS"})
      */
     public function commentPhotoAction(Request $request, Photo $photo)
     {
@@ -177,7 +177,7 @@ class PhotoController extends Controller
      *     "photoId": "\d+",
      *     "commentId": "\d+"
      * })
-     * @Method("DELETE")
+     * @Method({"DELETE", "OPTIONS"})
      */
     public function deleteAlbumCommentAction(Request $request, $photoId, $commentId)
     {

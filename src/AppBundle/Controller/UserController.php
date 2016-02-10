@@ -28,7 +28,7 @@ class UserController
 
     /**
      * @Route("/user/list")
-     * @Method("GET")
+     * @Method({"GET", "OPTIONS"})
      */
     public function getUserListAction(Request $request)
     {
@@ -45,7 +45,7 @@ class UserController
 
     /**
      * @Route("/authenticate")
-     * @Method("POST")
+     * @Method({"POST", "OPTIONS"})
      */
     public function authenticateAction(Request $request)
     {

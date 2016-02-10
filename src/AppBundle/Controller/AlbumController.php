@@ -18,7 +18,7 @@ class AlbumController extends Controller
      * @Route("/album/list/{page}", defaults={"page": 1}, requirements={
      *     "page": "\d+"
      * })
-     * @Method("GET")
+     * @Method({"GET", "OPTIONS"})
      */
     public function getAlbumListAction(Request $request, $page)
     {
@@ -38,7 +38,7 @@ class AlbumController extends Controller
 
     /**
      * @Route("/album")
-     * @Method("POST")
+     * @Method({"POST", "OPTIONS"})
      */
     public function postAlbumAction(Request $request)
     {
@@ -88,7 +88,7 @@ class AlbumController extends Controller
      * @Route("/album/{id}", requirements={
      *     "id": "\d+"
      * })
-     * @Method("DELETE")
+     * @Method({"DELETE", "OPTIONS"})
      */
     public function deleteAlbumAction(Request $request, Album $album)
     {
@@ -105,7 +105,7 @@ class AlbumController extends Controller
      * @Route("/album/{id}/comment", requirements={
      *     "id": "\d+"
      * })
-     * @Method("POST")
+     * @Method({"POST", "OPTIONS"})
      */
     public function commentAlbumAction(Request $request, Album $album)
     {
@@ -140,7 +140,7 @@ class AlbumController extends Controller
      *     "albumId": "\d+",
      *     "commentId": "\d+"
      * })
-     * @Method("DELETE")
+     * @Method({"DELETE", "OPTIONS"})
      */
     public function deleteAlbumCommentAction(Request $request, $albumId, $commentId)
     {

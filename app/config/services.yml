@@ -58,3 +58,13 @@ services:
         class: AppBundle\EventListener\ExceptionListener
         tags:
             - { name: kernel.event_listener, event: kernel.exception }
+
+    app.listener.cors_request_listener:
+        class: AppBundle\EventListener\CorsRequestListener
+        tags:
+            - { name: kernel.event_listener, event: kernel.request }
+
+    app.listener.cors_response_listener:
+        class: AppBundle\EventListener\CorsResponseListener
+        tags:
+            - { name: kernel.event_listener, event: kernel.response }
