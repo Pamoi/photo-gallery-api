@@ -26,9 +26,16 @@ security:
             stateless: true
             anonymous: ~
 
+        public:
+            pattern: ^/(album/list/\d+)|(photo/\d+(/(thumb|resized))?)$
+            stateless: true
+            methods: [GET]
+            anonymous: ~
+
         main:
             pattern: ^/
             stateless: true
+            methods: [GET, POST, PUT, DELETE]
             guard:
                 authenticators:
                     - app.jwt_authenticator

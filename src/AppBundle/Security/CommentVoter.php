@@ -40,6 +40,9 @@ class CommentVoter extends Voter
         }
 
         $user = $token->getUser();
+        if ($user == 'anon.') {
+            $user = null;
+        }
 
         if (!$user instanceof User) {
             return false;
