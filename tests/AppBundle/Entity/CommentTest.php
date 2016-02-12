@@ -21,15 +21,16 @@ class CommentTest extends \PHPUnit_Framework_TestCase
         $this->setId($author, 11);
         $author->setUsername('Toto');
 
+        $date = new \DateTime('11-01-2016');
         $comment = new Comment();
         $this->setId($comment, 5);
-        $comment->setDate(new \DateTime('11-01-2016'));
+        $comment->setDate($date);
         $comment->setText('Some text here.');
         $comment->setAuthor($author);
 
         $correct = array(
             'id' => 5,
-            'date' => '11-01-2016 00:00:00',
+            'date' => $date->format(\DateTime::ISO8601),
             'editDate' => null,
             'author' => array(
                 'id' => 11,
@@ -40,8 +41,9 @@ class CommentTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals($correct, $comment->toJson());
 
-        $comment->setEditDate(new \DateTime('12-01-2016 15:30:22'));
-        $correct['editDate'] = '12-01-2016 15:30:22';
+        $editDate = new \DateTime('12-01-2016 15:30:22');
+        $comment->setEditDate($editDate);
+        $correct['editDate'] = $editDate->format(\DateTime::ISO8601);
 
         $this->assertEquals($correct, $comment->toJson());
     }

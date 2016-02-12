@@ -12,13 +12,6 @@ use Symfony\Component\Validator\Constraints as Assert;
 class Comment implements PublicJsonInterface
 {
     /**
-     * @var DATE_FORMAT
-     *
-     * The format used to represent date and time in this class.
-     */
-    public static $DATE_FORMAT = 'd-m-Y H:i:s';
-
-    /**
      * @ORM\Column(type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
@@ -174,11 +167,11 @@ class Comment implements PublicJsonInterface
      */
     public function toJson()
     {
-        $editDate = $this->getEditDate() === null ? null : $this->getEditDate()->format(static::$DATE_FORMAT);
+        $editDate = $this->getEditDate() === null ? null : $this->getEditDate()->format(\DateTime::ISO8601);
 
         $data = array(
             'id' => $this->getId(),
-            'date' => $this->getDate()->format(static::$DATE_FORMAT),
+            'date' => $this->getDate()->format(\DateTime::ISO8601),
             'editDate' => $editDate,
             'author' => $this->getAuthor()->toJson(),
             'text' => $this->getText()

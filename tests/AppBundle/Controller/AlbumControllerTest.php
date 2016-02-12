@@ -31,13 +31,16 @@ class AlbumControllerTest extends CommandWebTestCase
     {
         $client = static::createClient();
 
+        $dateString = '12-01-2016';
+        $date = new \DateTime($dateString);
+
         $client->request(
             'POST',
             '/album',
             array(
                 'title' => 'The title',
                 'description' => 'I am a description',
-                'date' => '12-01-2016',
+                'date' => $dateString,
                 'authorsIds' => '2'
             ),
             array(),
@@ -54,7 +57,7 @@ class AlbumControllerTest extends CommandWebTestCase
         $this->assertGreaterThan(0, $album['id']);
         self::$albumId = $album['id'];
         $this->assertEquals('The title', $album['title']);
-        $this->assertEquals('12-01-2016', $album['date']);
+        $this->assertEquals($date->format(\DateTime::ISO8601), $album['date']);
         $this->assertEquals(0, $today->diff(new \DateTime($album['creationDate']))->i);
         $this->assertEquals(0, count($album['photos']));
         $this->assertEquals(0, count($album['comments']));

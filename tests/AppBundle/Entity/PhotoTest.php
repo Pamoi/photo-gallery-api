@@ -50,17 +50,19 @@ class PhotoTest extends \PHPUnit_Framework_TestCase
         $this->setId($author, 11);
         $author->setUsername('Toto');
 
+        $date = new \DateTime('11-01-2016 06:06:06');
+        $creationDate = new \DateTime('11-01-2016');
         $photo = new Photo();
         $this->setId($photo, 22);
-        $photo->setDate(new \DateTime('11-01-2016'));
-        $photo->setUploadDate(new \DateTime('11-01-2016 06:06:06'));
+        $photo->setDate($date);
+        $photo->setUploadDate($creationDate);
         $photo->setExtension('jpg');
         $photo->setAuthor($author);
 
         $correct = array(
             'id' => 22,
-            'date' => '11-01-2016 00:00:00',
-            'uploadDate' => '11-01-2016 06:06:06',
+            'date' => $date->format(\DateTime::ISO8601),
+            'uploadDate' => $creationDate->format(\DateTime::ISO8601),
             'author' => array(
                 'id' => 11,
                 'username' => 'Toto'

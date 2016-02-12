@@ -15,13 +15,6 @@ use Symfony\Component\Validator\Constraints as Assert;
 class Photo implements PublicJsonInterface
 {
     /**
-     * @var string $DATE_FORMAT
-     *
-     * The format used to represent date and time in this class.
-     */
-    public static $DATE_FORMAT = 'd-m-Y H:i:s';
-
-    /**
      * @var string $MIN_PREFIX
      *
      * Prefix to append before the file name of the photo for the thumbnail version.
@@ -348,8 +341,8 @@ class Photo implements PublicJsonInterface
 
         $data = array(
             'id' => $this->getId(),
-            'date' => $this->getDate()->format(static::$DATE_FORMAT),
-            'uploadDate' => $this->getUploadDate()->format(static::$DATE_FORMAT),
+            'date' => $this->getDate()->format(\DateTime::ISO8601),
+            'uploadDate' => $this->getUploadDate()->format(\DateTime::ISO8601),
             'author' => $this->getAuthor()->toJson(),
             'comments' => $comments,
         );
