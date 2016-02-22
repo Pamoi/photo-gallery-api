@@ -9,11 +9,13 @@ class ImagickPhotoResizer implements PhotoResizerInterface
     public function __construct($inputFilePath)
     {
         $this->img = new \Imagick($inputFilePath);
+        $this->autoRotate($this->img);
     }
 
     public function setInputFile($inputFilePath)
     {
         $this->img = new \Imagick($inputFilePath);
+        $this->autoRotate($this->img);
 
         return $this;
     }
@@ -60,5 +62,27 @@ class ImagickPhotoResizer implements PhotoResizerInterface
         } catch (\ImagickException $e) {
             throw new PhotoResizingException($e);
         }
+    }
+
+    // Adapted from http://php.net/manual/fr/imagick.getimageorientation.php#111448
+    private function autoRotate($image)
+    {
+        $orientation = $image->getImageOrientation();
+
+        switch($orientation) {
+            case \Imagick::ORIENTATION_BOTTOMRIGHT:
+                $image->rotateimage("#000", 180);
+                break;
+
+            case \Imagick::ORIENTATION_RIGHTTOP:
+                $image->rotateimage("#000", 90);
+                break;
+
+            case \Imagick::ORIENTATION_LEFTBOTTOM:
+                $image->rotateimage("#000", -90);
+                break;
+        }
+
+        $image->setImageOrientation(\Imagick::ORIENTATION_TOPLEFT);
     }
 }
