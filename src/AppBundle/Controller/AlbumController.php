@@ -15,6 +15,19 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class AlbumController extends Controller
 {
     /**
+     * @Route("/album/{id}", requirements={
+     *     "id": "\d+"
+     * })
+     * @Method({"GET", "OPTIONS"})
+     */
+    public function getAlbumAction(Request $request, Album $album)
+    {
+        $this->denyAccessUnlessGranted('view', $album);
+
+        return new JsonResponse($album->toJson());
+    }
+
+    /**
      * @Route("/album/list/{page}", defaults={"page": 1}, requirements={
      *     "page": "\d+"
      * })
@@ -60,7 +73,7 @@ class AlbumController extends Controller
         $album = new Album();
 
         $album->setTitle($title);
-        $album->setDescription($description);
+        $album->setDescription($description !== null ? $description : '');
         $album->setDate($date);
         $album->setCreationDate(new \DateTime());
         $album->addAuthor($this->getUser());
