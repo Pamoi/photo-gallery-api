@@ -43,8 +43,28 @@ class AlbumController extends Controller
             throw new NotFoundHttpException('There is no album at this page.');
         }
 
-        $albums = array_filter($albums, function($a) { return $this->isGranted('view', $a); });
-        $data = array_map(function($a) { return $a->toJson(); }, $albums);
+        $albums = array_filter($albums, $this->getIsGrantedFilter('view'));
+        $data = array_map($this->getJsonMapper(), $albums);
+
+        return new JsonResponse($data);
+    }
+
+    /**
+     * @Route("/album/search/{title}")
+     * @Method({"GET", "OPTIONS"})
+     */
+    public function findAlbumAction(Request $request, $title)
+    {
+        $repo = $this->getDoctrine()->getRepository('AppBundle:Album');
+
+        $albums = $repo->createQueryBuilder('a')
+            ->where('a.title LIKE :title')
+            ->setParameter('title', '%' . $title . '%')
+            ->getQuery()
+            ->getResult();
+
+        $albums = array_filter($albums, $this->getIsGrantedFilter('view'));
+        $data = array_map($this->getJsonMapper(), $albums);
 
         return new JsonResponse($data);
     }
@@ -184,5 +204,15 @@ class AlbumController extends Controller
         return new JsonResponse(array(
             'message' => 'Comment deleted.'
         ));
+    }
+
+    private function getIsGrantedFilter($property)
+    {
+        return function($a) use ($property) { return $this->isGranted($property, $a); };
+    }
+
+    private function getJsonMapper()
+    {
+        return function($obj) { return $obj->toJson(); };
     }
 }

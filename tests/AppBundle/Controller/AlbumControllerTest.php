@@ -192,6 +192,31 @@ class AlbumControllerTest extends CommandWebTestCase
     }
 
     /**
+     * @depends testPostAlbum
+     */
+    public function testSearchAlbum()
+    {
+        $client = static::createClient();
+
+        $client->request(
+            'GET',
+            '/album/search/title',
+            array(),
+            array(),
+            array(
+                'HTTP_X_AUTH_TOKEN' => self::$token
+            )
+        );
+
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+
+        $json = (array) json_decode($client->getResponse()->getContent());
+
+        $this->assertEquals(1, count($json));
+        $this->assertEquals('The title', $json[0]->title);
+    }
+
+    /**
      * @depends testCommentAlbum
      */
     public function testDeleteComment()

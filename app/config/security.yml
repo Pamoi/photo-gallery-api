@@ -27,7 +27,7 @@ security:
             anonymous: ~
 
         public:
-            pattern: ^/(album/(list/)?\d+)|(photo/\d+(/(thumb|resized))?)$
+            pattern: ^/(album/((list/)?\d+)|search/.*)|(photo/\d+(/(thumb|resized))?)$
             stateless: true
             methods: [GET]
             anonymous: ~
