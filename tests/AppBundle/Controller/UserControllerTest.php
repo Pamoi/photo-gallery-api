@@ -41,6 +41,8 @@ class UserControllerTest extends CommandWebTestCase
 
         $data = (array) json_decode($client->getResponse()->getContent());
         $this->assertEquals(self::$token, $data['token']);
+        $this->assertEquals('toto', $data['username']);
+        $this->assertEquals(1, $data['id']);
     }
 
     public function testInvalidCredentials()
@@ -79,6 +81,8 @@ class UserControllerTest extends CommandWebTestCase
 
         $data = (array) json_decode($client->getResponse()->getContent());
         $this->assertEquals(self::$token, $data['token']);
+        $this->assertEquals('toto', $data['username']);
+        $this->assertEquals(1, $data['id']);
     }
 
     public function testAuthenticationToken()
