@@ -238,6 +238,22 @@ class AlbumControllerTest extends CommandWebTestCase
         $json = (array) json_decode($client->getResponse()->getContent());
 
         $this->assertEquals('Comment deleted.', $json['message']);
+
+        $client->request(
+            'GET',
+            '/album/list',
+            array(),
+            array(),
+            array(
+                'HTTP_X_AUTH_TOKEN' => self::$token
+            )
+        );
+
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+
+        $json = json_decode($client->getResponse()->getContent(), true);
+
+        $this->assertEquals(0, count($json[0]['comments']));
     }
 
     /**
@@ -246,6 +262,19 @@ class AlbumControllerTest extends CommandWebTestCase
     public function testDeleteAlbum()
     {
         $client = static::createClient();
+
+        // Regression testing: check that the album can be deleted if it contains a comment
+        $client->request(
+            'GET',
+            '/album/search/title',
+            array(),
+            array(),
+            array(
+                'HTTP_X_AUTH_TOKEN' => self::$token
+            )
+        );
+
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
 
         $client->request(
             'DELETE',

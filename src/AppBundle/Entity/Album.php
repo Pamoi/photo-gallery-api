@@ -49,11 +49,7 @@ class Album implements PublicJsonInterface
     private $photos;
 
     /**
-     * @ORM\ManyToMany(targetEntity="Comment", cascade={"persist", "remove"})
-     * @ORM\JoinTable(name="albums_comments",
-     *      joinColumns={@ORM\JoinColumn(name="album_id", referencedColumnName="id")},
-     *      inverseJoinColumns={@ORM\JoinColumn(name="comment_id", referencedColumnName="id", unique=true)}
-     *      )
+     * @ORM\OneToMany(targetEntity="AlbumComment", mappedBy="album", cascade={"persist", "remove"})
      *
      * @Assert\Valid()
      */
@@ -222,13 +218,14 @@ class Album implements PublicJsonInterface
     /**
      * Add comment
      *
-     * @param \AppBundle\Entity\Comment $comment
+     * @param \AppBundle\Entity\AlbumComment $comment
      *
      * @return Album
      */
-    public function addComment(Comment $comment)
+    public function addComment(AlbumComment $comment)
     {
         $this->comments[] = $comment;
+        $comment->setAlbum($this);
 
         return $this;
     }
@@ -236,9 +233,9 @@ class Album implements PublicJsonInterface
     /**
      * Remove comment
      *
-     * @param \AppBundle\Entity\Comment $comment
+     * @param \AppBundle\Entity\AlbumComment $comment
      */
-    public function removeComment(Comment $comment)
+    public function removeComment(AlbumComment $comment)
     {
         $this->comments->removeElement($comment);
     }

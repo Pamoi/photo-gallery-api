@@ -278,6 +278,21 @@ class PhotoControllerTest extends CommandWebTestCase
     {
         $client = static::createClient();
 
+        // Regression testing: check that the photo can be deleted if it contains a comment
+        $client->request(
+            'POST',
+            '/photo/' . self::$photoId . '/comment',
+            array(
+                'text' => 'Hello there'
+            ),
+            array(),
+            array(
+                'HTTP_X_AUTH_TOKEN' => self::$token
+            )
+        );
+
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+
         $client->request(
             'DELETE',
             '/photo/' . self::$photoId,

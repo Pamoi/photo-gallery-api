@@ -3,7 +3,7 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\Photo;
-use AppBundle\Entity\Comment;
+use AppBundle\Entity\PhotoComment;
 use AppBundle\Util\Util;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -150,7 +150,7 @@ class PhotoController extends Controller
 
         $text = $request->get('text');
 
-        $comment = new Comment();
+        $comment = new PhotoComment();
         $comment->setText($text);
         $comment->setAuthor($this->getUser());
         $comment->setDate(new \DateTime());
@@ -179,11 +179,11 @@ class PhotoController extends Controller
      * })
      * @Method({"DELETE", "OPTIONS"})
      */
-    public function deleteAlbumCommentAction(Request $request, $photoId, $commentId)
+    public function deletePhotoCommentAction(Request $request, $photoId, $commentId)
     {
         $em = $this->getDoctrine()->getManager();
         $photo = $em->getRepository('AppBundle:Photo')->findOneById($photoId);
-        $comment = $em->getRepository('AppBundle:Comment')->findOneById($commentId);
+        $comment = $em->getRepository('AppBundle:PhotoComment')->findOneById($commentId);
 
         if (null === $photo) {
             return new JsonResponse(array(
@@ -200,9 +200,7 @@ class PhotoController extends Controller
         $this->denyAccessUnlessGranted('delete', $comment, 'You are not allowed to delete this comment.');
 
         $photo->removeComment($comment);
-
         $em->remove($comment);
-        $em->persist($photo);
         $em->flush();
 
         return new JsonResponse(array(

@@ -6,8 +6,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * @ORM\Table(name="comments")
- * @ORM\Entity()
+ * @ORM\MappedSuperclass()
  */
 class Comment implements PublicJsonInterface
 {
@@ -16,7 +15,7 @@ class Comment implements PublicJsonInterface
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    private $id;
+    protected $id;
 
     /**
      * @ORM\ManyToOne(targetEntity="User")
@@ -170,7 +169,7 @@ class Comment implements PublicJsonInterface
         $editDate = $this->getEditDate() === null ? null : $this->getEditDate()->format(\DateTime::ISO8601);
 
         $data = array(
-            'id' => $this->getId(),
+            'id' => $this->id,
             'date' => $this->getDate()->format(\DateTime::ISO8601),
             'editDate' => $editDate,
             'author' => $this->getAuthor()->toJson(),

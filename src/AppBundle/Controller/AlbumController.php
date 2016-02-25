@@ -3,7 +3,7 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\Album;
-use AppBundle\Entity\Comment;
+use AppBundle\Entity\AlbumComment;
 use AppBundle\Util\Util;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -146,7 +146,7 @@ class AlbumController extends Controller
 
         $text = $request->get('text');
 
-        $comment = new Comment();
+        $comment = new AlbumComment();
         $comment->setText($text);
         $comment->setAuthor($this->getUser());
         $comment->setDate(new \DateTime());
@@ -179,7 +179,7 @@ class AlbumController extends Controller
     {
         $em = $this->getDoctrine()->getManager();
         $album = $em->getRepository('AppBundle:Album')->findOneById($albumId);
-        $comment = $em->getRepository('AppBundle:Comment')->findOneById($commentId);
+        $comment = $em->getRepository('AppBundle:AlbumComment')->findOneById($commentId);
 
         if (null === $album) {
             return new JsonResponse(array(
@@ -196,9 +196,7 @@ class AlbumController extends Controller
         $this->denyAccessUnlessGranted('delete', $comment, 'You are not allowed to delete this comment.');
 
         $album->removeComment($comment);
-
         $em->remove($comment);
-        $em->persist($album);
         $em->flush();
 
         return new JsonResponse(array(
