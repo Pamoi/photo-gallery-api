@@ -18,6 +18,7 @@ class AlbumControllerTest extends CommandWebTestCase
         self::runCommand('doctrine:schema:update --force');
         self::runCommand('user:add toto toto@example.com pwd123');
         self::runCommand('user:add titi titi@example.com pwd123');
+        self::runCommand('user:add tata tata@example.com pwd123');
 
         $payload = array(
             'username' => 'toto'
@@ -210,10 +211,128 @@ class AlbumControllerTest extends CommandWebTestCase
 
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
 
-        $json = (array) json_decode($client->getResponse()->getContent());
+        $json = json_decode($client->getResponse()->getContent(), true);
 
         $this->assertEquals(1, count($json));
-        $this->assertEquals('The title', $json[0]->title);
+        $this->assertEquals('The title', $json[0]['title']);
+    }
+
+    /**
+     * @depends testPostAlbum
+     */
+    public function testPutAlbum()
+    {
+        $date = new \DateTime('28-02-2016');
+
+        $client = static::createClient();
+
+        $client->request(
+            'POST',
+            '/album/' . self::$albumId,
+            array(
+                'title' => 'Updated title',
+                'description' => '',
+                'date' => $date->format(\DateTime::ISO8601),
+                'authorsIds' => '3'
+            ),
+            array(),
+            array(
+                'HTTP_X_AUTH_TOKEN' => self::$token
+            )
+        );
+
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+
+        $album = json_decode($client->getResponse()->getContent(), true);
+
+        $this->assertEquals('Updated title', $album['title']);
+        $this->assertEquals('', $album['description']);
+        $this->assertEquals($date->format(\DateTime::ISO8601), $album['date']);
+        $this->assertEquals(3, count($album['authors']));
+        $this->assertEquals('tata', $album['authors'][2]['username']);
+
+        // Test when getting the album from the album list
+        $client->request(
+            'GET',
+            '/album/list',
+            array(),
+            array(),
+            array(
+                'HTTP_X_AUTH_TOKEN' => self::$token
+            )
+        );
+
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+
+        $json = json_decode($client->getResponse()->getContent(), true);
+        $album = $json[0];
+
+        $this->assertEquals('Updated title', $album['title']);
+        $this->assertEquals('', $album['description']);
+        $this->assertEquals($date->format(\DateTime::ISO8601), $album['date']);
+        $this->assertEquals(3, count($album['authors']));
+        $this->assertEquals('tata', $album['authors'][2]['username']);
+    }
+
+    /**
+     * @depends testPutAlbum
+     */
+    public function testPutAlbumWithoutTitle()
+    {
+        $date = new \DateTime('13-12-2011');
+
+        $client = static::createClient();
+
+        $client->request(
+            'POST',
+            '/album/' . self::$albumId,
+            array(
+                'description' => 'New desc',
+                'date' => $date->format(\DateTime::ISO8601),
+            ),
+            array(),
+            array(
+                'HTTP_X_AUTH_TOKEN' => self::$token
+            )
+        );
+
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+
+        $album = json_decode($client->getResponse()->getContent(), true);
+
+        $this->assertEquals('Updated title', $album['title']);
+        $this->assertEquals('New desc', $album['description']);
+        $this->assertEquals($date->format(\DateTime::ISO8601), $album['date']);
+    }
+
+    /**
+     * @depends testPutAlbumWithoutTitle
+     */
+    public function testPutAlbumWithoutDate()
+    {
+        $date = new \DateTime('13-12-2011');
+
+        $client = static::createClient();
+
+        $client->request(
+            'POST',
+            '/album/' . self::$albumId,
+            array(
+                'title' => 'another title'
+            ),
+            array(),
+            array(
+                'HTTP_X_AUTH_TOKEN' => self::$token
+            )
+        );
+
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+
+        $album = json_decode($client->getResponse()->getContent(), true);
+
+        $this->assertEquals('another title', $album['title']);
+        $this->assertEquals('New desc', $album['description']);
+        $this->assertEquals($date->format(\DateTime::ISO8601), $album['date']);
     }
 
     /**

@@ -121,6 +121,58 @@ class AlbumController extends Controller
      * @Route("/album/{id}", requirements={
      *     "id": "\d+"
      * })
+     * @Method({"POST", "OPTIONS"})
+     *
+     * This controller uses POST method as PHP does not get form data from PUT methods.
+     */
+    public function putAlbumAction(Request $request, Album $album)
+    {
+        $this->denyAccessUnlessGranted('edit', $album, 'You are not allowed to edit this album.');
+
+        $title = $request->request->get('title');
+        $description = $request->request->get('description');
+        $dateString = $request->request->get('date');
+        $authorsIds = explode(',', $request->request->get('authorsIds'));
+
+        try {
+            $date = new \DateTime($dateString);
+        } catch (\Exception $e) {
+            return new JsonResponse(array(
+                'message' => 'Invalid arguments.',
+                'list' => array('date: Unable to parse string.')
+            ), 422);
+        }
+
+        $title === null ? : $album->setTitle($title);
+        $description === null ? : $album->setDescription($description);
+        $dateString === null ? : $album->setDate($date);
+
+        $em = $this->getDoctrine()->getManager();
+        $authors = $em->getRepository('AppBundle:User')->findById($authorsIds);
+
+        foreach ($authors as $author) {
+            if (!$album->getAuthors()->contains($author)) {
+                $album->addAuthor($author);
+            }
+        }
+
+        $validator = $this->get('validator');
+        $errors = $validator->validate($album);
+
+        if (count($errors) > 0) {
+            return new JsonResponse(Util::violationListToJson($errors), 422);
+        }
+
+        $em->persist($album);
+        $em->flush();
+
+        return new JsonResponse($album->toJson());
+    }
+
+    /**
+     * @Route("/album/{id}", requirements={
+     *     "id": "\d+"
+     * })
      * @Method({"DELETE", "OPTIONS"})
      */
     public function deleteAlbumAction(Request $request, Album $album)
