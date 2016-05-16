@@ -48,6 +48,12 @@ services:
         tags:
             - { name: console.command }
 
+    app.command.set_user_password:
+        class: AppBundle\Command\SetUserPasswordCommand
+        arguments: ["@doctrine.orm.entity_manager", "@security.password_encoder", "@logger"]
+        tags:
+            - { name: console.command }
+
     app.listener.photo_listener:
         class: AppBundle\EventListener\PhotoListener
         arguments: ["%photo_upload_dir%"]
