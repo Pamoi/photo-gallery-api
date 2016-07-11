@@ -61,7 +61,7 @@ class UserControllerTest extends CommandWebTestCase
         $this->assertEquals(401, $client->getResponse()->getStatusCode());
 
         $data = (array) json_decode($client->getResponse()->getContent());
-        $this->assertEquals('Invalid username or password', $data['message']);
+        $this->assertEquals('Invalid username or password.', $data['message']);
     }
 
     public function testAuthenticateWithEmail()
@@ -171,5 +171,120 @@ class UserControllerTest extends CommandWebTestCase
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(1, count($data));
         $this->assertEquals('toto', $data[0]['username']);
+    }
+
+    public function testSetPassword()
+    {
+        $client = static::createClient();
+
+        $client->request(
+            'POST',
+            '/password',
+            array(
+                'username' => 'toto',
+                'oldPass' => 'pwd123',
+                'newPass' => 'pwd456'
+            ),
+            array(),
+            array(
+                'HTTP_X_AUTH_TOKEN' => self::$token
+            )
+        );
+
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+    }
+
+    /**
+     * @depends testSetPassword
+     */
+    public function testCanAuthenticateWithNewPassword()
+    {
+        $client = static::createClient();
+
+        $client->request(
+            'POST',
+            '/authenticate',
+            array(
+                'username' => 'toto',
+                'password' => 'pwd456'
+            )
+        );
+
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+
+        $data = (array) json_decode($client->getResponse()->getContent());
+        $this->assertEquals(self::$token, $data['token']);
+        $this->assertEquals('toto', $data['username']);
+        $this->assertEquals(1, $data['id']);
+    }
+
+    /**
+     * @depends testSetPassword
+     */
+    public function testCannotAuthenticateWithOldPassword()
+    {
+        $client = static::createClient();
+
+        $client->request(
+            'POST',
+            '/authenticate',
+            array(
+                'username' => 'toto',
+                'password' => 'pwd123'
+            )
+        );
+
+        $this->assertEquals(401, $client->getResponse()->getStatusCode());
+
+        $data = (array) json_decode($client->getResponse()->getContent());
+        $this->assertEquals('Invalid username or password.', $data['message']);
+    }
+
+    public function testShortPassword()
+    {
+        $client = static::createClient();
+
+        $client->request(
+            'POST',
+            '/password',
+            array(
+                'username' => 'toto',
+                'oldPass' => 'pwd123',
+                'newPass' => 'pwd'
+            ),
+            array(),
+            array(
+                'HTTP_X_AUTH_TOKEN' => self::$token
+            )
+        );
+
+        $this->assertEquals(401, $client->getResponse()->getStatusCode());
+
+        $data = (array) json_decode($client->getResponse()->getContent());
+        $this->assertEquals('The new password must be between 4 and 4096 characters long.', $data['message']);
+    }
+
+    public function testInvalidSetPassword()
+    {
+        $client = static::createClient();
+
+        $client->request(
+            'POST',
+            '/password',
+            array(
+                'username' => 'toto',
+                'oldPass' => 'notThePassword',
+                'newPass' => 'pwd456'
+            ),
+            array(),
+            array(
+                'HTTP_X_AUTH_TOKEN' => self::$token
+            )
+        );
+
+        $this->assertEquals(401, $client->getResponse()->getStatusCode());
+
+        $data = (array) json_decode($client->getResponse()->getContent());
+        $this->assertEquals('Invalid username or password.', $data['message']);
     }
 }

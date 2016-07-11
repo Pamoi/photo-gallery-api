@@ -61,7 +61,7 @@ class UserController
 
         if (!$valid) {
             $data = array(
-                'message' => 'Invalid username or password'
+                'message' => 'Invalid username or password.'
             );
 
             return new JsonResponse($data, 401);
@@ -77,5 +77,46 @@ class UserController
         $data['token'] = $jwt;
 
         return new JsonResponse($data);
+    }
+
+    /**
+     * @Route("/password")
+     * @Method({"POST", "OPTIONS"})
+     */
+    public function setPasswordAction(Request $request)
+    {
+        $username = $request->get('username');
+        $oldPass = $request->get('oldPass');
+        $newPass = $request->get('newPass');
+
+        $passwordLength = strlen($newPass);
+        if ($passwordLength < 4 || $passwordLength > 4096) {
+            return new JsonResponse(array(
+                'message' => 'The new password must be between 4 and 4096 characters long.'
+            ), 401);
+        }
+
+        try {
+            $user = $this->em->getRepository('AppBundle:User')->loadUserByUsername($username);
+            $valid = $this->encoder->isPasswordValid($user, $oldPass);
+        } catch (UsernameNotFoundException $e) {
+            $valid = false;
+        }
+
+        if (!$valid) {
+            return new JsonResponse(array(
+                'message' => 'Invalid username or password.'
+            ), 401);
+        }
+
+        $hashedPassword = $this->encoder->encodePassword($user, $newPass);
+        $user->setPassword($hashedPassword);
+
+        $this->em->persist($user);
+        $this->em->flush();
+
+        return new JsonResponse(array(
+            'message' => 'Success.'
+        ));
     }
 }
