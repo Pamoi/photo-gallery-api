@@ -8,6 +8,7 @@ use AppBundle\Util\Util;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -47,6 +48,35 @@ class AlbumController extends Controller
         $data = array_map($this->getJsonMapper(), $albums);
 
         return new JsonResponse($data);
+    }
+
+    /**
+     * @Route("/album/{id}/download", requirements={
+     *     "id": "\d+"
+     * })
+     * @Method({"GET", "OPTIONS"})
+     */
+    public function downloadAlbumAction(Request $request, Album $album)
+    {
+        $this->denyAccessUnlessGranted('view', $album);
+
+        $uploadDir = $this->getParameter('photo_upload_dir');
+        $filename = $uploadDir . '/' . $album->getId() . '-' . $album->getTitle() . '.zip';
+        $zip = new \ZipArchive();
+
+        if ($zip->open($filename, \ZipArchive::CREATE) !== true) {
+          throw new Exception('Cannot open or create ZIP archive for file ' . $filename);
+        }
+
+        foreach ($album->getPhotos() as $photo) {
+          if ($zip->locateName($photo->getFilename()) === false) {
+            $zip->addFile($uploadDir . '/' . $photo->getFilename(), $photo->getFilename());
+          }
+        }
+
+        $zip->close();
+
+        return new BinaryFileResponse($filename);
     }
 
     /**
