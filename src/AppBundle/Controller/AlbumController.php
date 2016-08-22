@@ -51,6 +51,26 @@ class AlbumController extends Controller
     }
 
     /**
+     * @Route("/album/{id}/downloadToken", requirements={
+     *     "id": "\d+"
+     * })
+     * @Method({"GET", "OPTIONS"})
+     */
+    public function getDownloadTokenAction(Request $request, Album $album)
+    {
+        $this->denyAccessUnlessGranted('view', $album);
+
+        $secret = $uploadDir = $this->getParameter('secret') . '54 90df2!!fh++ gGZ)=';
+        $date = new \DateTime();
+        $time = $date->format('d-m-Y H:i');
+        $token = hash('sha256', $secret . $time . $album->getId());
+
+        return new JsonResponse(array(
+          'token' => $token
+        ));
+    }
+
+    /**
      * @Route("/album/{id}/download", requirements={
      *     "id": "\d+"
      * })
@@ -58,7 +78,20 @@ class AlbumController extends Controller
      */
     public function downloadAlbumAction(Request $request, Album $album)
     {
-        $this->denyAccessUnlessGranted('view', $album);
+        // Verify token
+        $secret = $uploadDir = $this->getParameter('secret') . '54 90df2!!fh++ gGZ)=';
+        $date = new \DateTime();
+        $time = $date->format('d-m-Y H:i');
+        $correct = hash('sha256', $secret . $time . $album->getId());
+        $token = $request->query->get('token');
+
+        if ($token === null) {
+          $token = '';
+        }
+
+        if (!hash_equals($correct, $token)) {
+          return new JsonResponse(array('message' => 'Invalid token.'), 403);
+        }
 
         $uploadDir = $this->getParameter('photo_upload_dir');
         $filename = $uploadDir . '/' . $album->getId() . '-' . $album->getTitle() . '.zip';
@@ -76,7 +109,10 @@ class AlbumController extends Controller
 
         $zip->close();
 
-        return new BinaryFileResponse($filename);
+        $response = new BinaryFileResponse($filename);
+        $response->headers->set('Content-disposition', 'attachment;filename="' . $album->getTitle() . '.zip"');
+
+        return $response;
     }
 
     /**
