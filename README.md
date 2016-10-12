@@ -27,7 +27,7 @@ php bin/console doctrine:schema:update --force
 
 You can then add users to the system:
 
-```bash
+```
 php bin/console user:add <name> <email> <password>
 ```
 
@@ -37,7 +37,7 @@ The poject uses the [image magick](http://www.imagemagick.org/script/index.php)
 library. On Debian based systems you can install it by typing:
 
 ```bash
-sudo apt-gt install php-imagick
+sudo apt-get install php-imagick
 ```
 
 Finally, serve the `web/app.php` file with your favorite web server.
