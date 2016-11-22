@@ -68,7 +68,8 @@ class UserController
         }
 
         $token = array(
-            'username' => $user->getUsername()
+            'username' => $user->getUsername(),
+            'exp' => time() + (60 * 60 * 24 * 7) // The token is valid for one week
         );
 
         $jwt = JWT::encode($token, $this->key);

@@ -6,7 +6,7 @@ use Firebase\JWT\JWT;
 
 class UserControllerTest extends CommandWebTestCase
 {
-    private static $token;
+    private static $secret;
 
     public static function setUpBeforeClass()
     {
@@ -16,17 +16,46 @@ class UserControllerTest extends CommandWebTestCase
         self::runCommand('doctrine:schema:update --force');
         self::runCommand('user:add toto toto@example.com pwd123');
 
+        static::$secret = self::getApplication()->getKernel()->getContainer()->getParameter('secret');
+    }
+
+    public static function getToken($time = 0)
+    {
+        // If unspecified, use standard expiration date
+        if ($time == 0) {
+            $time = time() + (60 * 60 * 24 * 7);
+        }
+
         $payload = array(
-            'username' => 'toto'
+            'username' => 'toto',
+            'exp' => $time
         );
 
-        $secret = self::getApplication()->getKernel()->getContainer()->getParameter('secret');
-        self::$token = JWT::encode($payload, $secret);
+        return JWT::encode($payload, static::$secret);
+    }
+
+    /* Returns a lisit of tokens with three consecutive expiration times in
+     * case the test request takes 1 or 2 seconds to execute.
+     */
+    public static function getTokens($time = 0)
+    {
+        if ($time == 0) {
+            $time = time() + (60 * 60 * 24 * 7);
+        }
+
+        $tokens = array(
+            static::getToken($time),
+            static::getToken($time + 1),
+            static::getToken($time + 2)
+        );
+
+        return $tokens;
     }
 
     public function testAuthenticate()
     {
         $client = static::createClient();
+        $tokens = static::getTokens();
 
         $client->request(
             'POST',
@@ -40,7 +69,7 @@ class UserControllerTest extends CommandWebTestCase
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
 
         $data = (array) json_decode($client->getResponse()->getContent());
-        $this->assertEquals(self::$token, $data['token']);
+        $this->assertContains($data['token'], $tokens);
         $this->assertEquals('toto', $data['username']);
         $this->assertEquals(1, $data['id']);
     }
@@ -67,6 +96,7 @@ class UserControllerTest extends CommandWebTestCase
     public function testAuthenticateWithEmail()
     {
         $client = static::createClient();
+        $tokens = static::getTokens();
 
         $client->request(
             'POST',
@@ -80,7 +110,7 @@ class UserControllerTest extends CommandWebTestCase
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
 
         $data = (array) json_decode($client->getResponse()->getContent());
-        $this->assertEquals(self::$token, $data['token']);
+        $this->assertContains($data['token'], $tokens);
         $this->assertEquals('toto', $data['username']);
         $this->assertEquals(1, $data['id']);
     }
@@ -137,6 +167,27 @@ class UserControllerTest extends CommandWebTestCase
         $this->assertEquals('Invalid token', $data['message']);
     }
 
+    public function testExpiredToken()
+    {
+        $client = static::createClient();
+        $token = static::getToken(time() - 1000);
+
+        $client->request(
+            'GET',
+            '/',
+            array(),
+            array(),
+            array(
+                'HTTP_X_AUTH_TOKEN' => $token
+            )
+        );
+
+        $this->assertEquals(403, $client->getResponse()->getStatusCode());
+
+        $data = (array) json_decode($client->getResponse()->getContent());
+        $this->assertEquals('Invalid token', $data['message']);
+    }
+
     public function testNoTokenProvided()
     {
         $client = static::createClient();
@@ -155,6 +206,7 @@ class UserControllerTest extends CommandWebTestCase
     public function testGetUserList()
     {
         $client = static::createClient();
+        $token = static::getToken();
 
         $client->request(
             'GET',
@@ -162,7 +214,7 @@ class UserControllerTest extends CommandWebTestCase
             array(),
             array(),
             array(
-                'HTTP_X_AUTH_TOKEN' => self::$token
+                'HTTP_X_AUTH_TOKEN' => $token
             )
         );
 
@@ -176,6 +228,7 @@ class UserControllerTest extends CommandWebTestCase
     public function testSetPassword()
     {
         $client = static::createClient();
+        $token = static::getToken();
 
         $client->request(
             'POST',
@@ -187,7 +240,7 @@ class UserControllerTest extends CommandWebTestCase
             ),
             array(),
             array(
-                'HTTP_X_AUTH_TOKEN' => self::$token
+                'HTTP_X_AUTH_TOKEN' => $token
             )
         );
 
@@ -200,6 +253,7 @@ class UserControllerTest extends CommandWebTestCase
     public function testCanAuthenticateWithNewPassword()
     {
         $client = static::createClient();
+        $tokens = static::getTokens();
 
         $client->request(
             'POST',
@@ -213,7 +267,7 @@ class UserControllerTest extends CommandWebTestCase
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
 
         $data = (array) json_decode($client->getResponse()->getContent());
-        $this->assertEquals(self::$token, $data['token']);
+        $this->assertContains($data['token'], $tokens);
         $this->assertEquals('toto', $data['username']);
         $this->assertEquals(1, $data['id']);
     }
@@ -243,6 +297,7 @@ class UserControllerTest extends CommandWebTestCase
     public function testShortPassword()
     {
         $client = static::createClient();
+        $token = static::getToken();
 
         $client->request(
             'POST',
@@ -254,7 +309,7 @@ class UserControllerTest extends CommandWebTestCase
             ),
             array(),
             array(
-                'HTTP_X_AUTH_TOKEN' => self::$token
+                'HTTP_X_AUTH_TOKEN' => $token
             )
         );
 
@@ -267,6 +322,7 @@ class UserControllerTest extends CommandWebTestCase
     public function testInvalidSetPassword()
     {
         $client = static::createClient();
+        $token = static::getToken();
 
         $client->request(
             'POST',
@@ -278,7 +334,7 @@ class UserControllerTest extends CommandWebTestCase
             ),
             array(),
             array(
-                'HTTP_X_AUTH_TOKEN' => self::$token
+                'HTTP_X_AUTH_TOKEN' => $token
             )
         );
 
