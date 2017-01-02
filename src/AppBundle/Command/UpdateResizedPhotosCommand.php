@@ -51,8 +51,9 @@ class UpdateResizedPhotosCommand extends Command
               $resizer = new ImagickPhotoResizer($filename);
               $resizer->resize($this->uploadRootDir . $photo->getResizedFilename(), 1920, 1080);
             } catch (PhotoResizingException $e) {
-                $this->logger->info('Failed to resize photo ' . $filename);
-                $output->writeln('<info>Failed to resize photo ' . $filename . '</info>');
+                $errorMessage = 'Failed to resize photo ' . $filename . ' : ' . $e->getMessage();
+                $this->logger->info($errorMessage);
+                $output->writeln($errorMessage);
             }
         }
 
