@@ -50,7 +50,7 @@ class PhotoListener
 
         $resizer = new ImagickPhotoResizer($this->uploadRootDir . $photo->getFilename());
 
-        $resizer->resize($this->uploadRootDir . $photo->getResizedFilename(), 1000, 700);
+        $resizer->resize($this->uploadRootDir . $photo->getResizedFilename(), 1920, 1080);
         $resizer->resizeToSquare($this->uploadRootDir . $photo->getThumbFilename(), 300);
 
         $photo->setFile(null);

@@ -11,6 +11,7 @@ services:
         class: AppBundle\Security\JWTAuthenticator
         arguments: ["@doctrine.orm.entity_manager", "%secret%"]
 
+# Voters
     app.voter.album_voter:
         class: AppBundle\Security\AlbumVoter
         arguments: ['@security.access.decision_manager']
@@ -32,10 +33,12 @@ services:
         tags:
             - { name: security.voter }
 
+# Controllers
     app.user_controller:
         class: AppBundle\Controller\UserController
         arguments: ["@doctrine.orm.entity_manager", "@security.password_encoder", "%secret%"]
 
+# COmmands
     app.command.add_user:
         class: AppBundle\Command\AddUserCommand
         arguments: ["@doctrine.orm.entity_manager", "@security.password_encoder", "@logger"]
@@ -54,6 +57,13 @@ services:
         tags:
             - { name: console.command }
 
+    app.command.update_resized_photos:
+        class: AppBundle\Command\UpdateResizedPhotosCommand
+        arguments: ["@doctrine.orm.entity_manager", "@logger", "%photo_upload_dir%"]
+        tags:
+            - { name: console.command }
+
+# Listeners
     app.listener.photo_listener:
         class: AppBundle\EventListener\PhotoListener
         arguments: ["%photo_upload_dir%"]
