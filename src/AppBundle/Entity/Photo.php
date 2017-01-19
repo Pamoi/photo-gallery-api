@@ -78,7 +78,7 @@ class Photo implements PublicJsonInterface
     private $extension;
 
     /**
-     * @Assert\Image(maxSize="12M")
+     * @Assert\Image(maxSize="20M")
      */
     private $file;
 
