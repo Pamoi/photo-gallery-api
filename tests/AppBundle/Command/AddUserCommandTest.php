@@ -2,7 +2,7 @@
 
 namespace Tests\AppBundle\Command;
 
-use AppBundle\Command\AddUserCommand;
+//use AppBundle\Command\AddUserCommand;
 
 class AddUserCommandTest extends \PHPUnit_Framework_TestCase
 {
