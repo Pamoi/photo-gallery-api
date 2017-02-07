@@ -14,7 +14,7 @@ class UserControllerTest extends CommandWebTestCase
         self::runCommand('doctrine:database:drop --force');
         self::runCommand('doctrine:database:create');
         self::runCommand('doctrine:schema:update --force');
-        self::runCommand('user:add toto toto@example.com pwd123');
+        self::runCommand('user:add toto toto@example.com pwd123 ROLE_ADMIN');
 
         static::$secret = self::getApplication()->getKernel()->getContainer()->getParameter('secret');
     }
@@ -68,10 +68,11 @@ class UserControllerTest extends CommandWebTestCase
 
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
 
-        $data = (array) json_decode($client->getResponse()->getContent());
+        $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertContains($data['token'], $tokens);
         $this->assertEquals('toto', $data['username']);
         $this->assertEquals(1, $data['id']);
+        $this->assertEquals(true, $data['admin']);
     }
 
     public function testInvalidCredentials()
@@ -223,6 +224,7 @@ class UserControllerTest extends CommandWebTestCase
         $data = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(1, count($data));
         $this->assertEquals('toto', $data[0]['username']);
+        $this->assertEquals(false, array_key_exists('admin', $data[0]));
     }
 
     public function testSetPassword()

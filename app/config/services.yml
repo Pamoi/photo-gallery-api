@@ -38,7 +38,7 @@ services:
         class: AppBundle\Controller\UserController
         arguments: ["@doctrine.orm.entity_manager", "@security.password_encoder", "%secret%"]
 
-# COmmands
+# Commands
     app.command.add_user:
         class: AppBundle\Command\AddUserCommand
         arguments: ["@doctrine.orm.entity_manager", "@security.password_encoder", "@logger"]

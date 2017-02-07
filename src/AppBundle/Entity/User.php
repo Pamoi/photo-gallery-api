@@ -91,7 +91,7 @@ class User implements AdvancedUserInterface, \Serializable, PublicJsonInterface
     /**
      * Get roles
      *
-     * @return ArrayCollection
+     * @return array
      */
     public function getRoles()
     {
@@ -230,12 +230,16 @@ class User implements AdvancedUserInterface, \Serializable, PublicJsonInterface
     /**
      * {@inheritdoc }
      */
-    public function toJson()
+    public function toJson($includeRole = false)
     {
         $data = array(
             'id' => $this->getId(),
             'username' => $this->getUsername()
         );
+        
+        if ($includeRole) {
+        	$data['admin'] = in_array(static::$ROLE_ADMIN, $this->getRoles());
+        }
 
         return $data;
     }

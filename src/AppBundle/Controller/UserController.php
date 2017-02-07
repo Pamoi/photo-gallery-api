@@ -74,7 +74,7 @@ class UserController
 
         $jwt = JWT::encode($token, $this->key);
 
-        $data = $user->toJson();
+        $data = $user->toJson(true);
         $data['token'] = $jwt;
 
         return new JsonResponse($data);
