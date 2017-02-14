@@ -342,4 +342,28 @@ class PhotoControllerTest extends CommandWebTestCase
 
         $this->assertEquals(2, count($json[0]['photos']));
     }
+    
+    /**
+     * @depends testDeletePhoto
+     */
+    public function testDeletePhotoFromArchive()
+    {
+    	$archiveName = static::$uploadDir . '/album-' . static::$albumId . '.zip';
+    	
+    	// Archive must exist as the album contains other photos than the one we deleted.
+    	$this->assertTrue(file_exists($archiveName), 'Archive file does not exist.');
+    	 
+    	$zip = new \ZipArchive();
+    	 
+    	if ($zip->open($archiveName) !== true) {
+    		$this->fail('Cannot open archive');
+    	}
+    	 
+    	$content = $zip->getFromName(static::$photoId . '.jpeg');
+    	if ($content !== false) {
+    		$this->fail('Photo file not deleted from archive.');
+    	}
+    	 
+    	$zip->close();
+    }
 }
