@@ -150,6 +150,28 @@ class PhotoControllerTest extends CommandWebTestCase
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
         $this->assertEquals('image/jpeg', $client->getResponse()->headers->get('Content-Type'));
     }
+    
+    /**
+     * @depends testPostSinglePhoto
+     */
+    public function testAlbumArchive()
+    {
+    	$archiveName = static::$uploadDir . '/album-' . static::$albumId . '.zip';
+    	$this->assertTrue(file_exists($archiveName), 'Archive file does not exist.');
+    	
+    	$zip = new \ZipArchive();
+    	
+    	if ($zip->open($archiveName) !== true) {
+    		$this->fail('Cannot open archive');
+    	}
+    	
+    	$content = $zip->getFromName(static::$photoId . '.jpeg');
+    	if ($content === false) {
+    		$this->fail('Archive does not contain photo file.');
+    	}
+    	
+    	$zip->close();
+    }
 
     /**
      * @depends testPostSinglePhoto
