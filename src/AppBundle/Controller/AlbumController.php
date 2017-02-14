@@ -98,7 +98,7 @@ class AlbumController extends Controller
         $zip = new \ZipArchive();
 
         if ($zip->open($filename, \ZipArchive::CREATE) !== true) {
-          throw new Exception('Cannot open or create ZIP archive for file ' . $filename);
+          throw new \Exception('Cannot open or create ZIP archive for file ' . $filename);
         }
 
         foreach ($album->getPhotos() as $photo) {

@@ -12,6 +12,20 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 class Album implements PublicJsonInterface
 {
+	/**
+	 * @var string $ARCHIVE_PREFIX
+	 *
+	 * Prefix to append before the file name of the album archive.
+	 */
+	private $ARCHIVE_PREFIX = 'album-';
+	
+	/**
+	 * @var string $ARCHIVE_EXT
+	 *
+	 * Prefix to append after the file name of the album archive.
+	 */
+	private $ARCHIVE_EXT = '.zip';
+	
     /**
      * @ORM\Column(type="integer")
      * @ORM\Id
@@ -320,6 +334,16 @@ class Album implements PublicJsonInterface
     public function isPublic()
     {
         return $this->isPublic;
+    }
+    
+    /**
+     * Get the filename of the archive containing this album's photos.
+     * 
+     * @return string
+     */
+    public function getArchiveName()
+    {
+    	return $this->ARCHIVE_PREFIX . $this->id . $this->ARCHIVE_EXT; 
     }
 
     /**
