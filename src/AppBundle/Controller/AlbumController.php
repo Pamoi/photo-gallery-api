@@ -92,22 +92,19 @@ class AlbumController extends Controller
         if (!hash_equals($correct, $token)) {
           return new JsonResponse(array('message' => 'Invalid token.'), 403);
         }
+        
+        if ($album->getPhotos()->count() == 0) {
+        	return new JsonResponse(array(
+        			'message' => 'This album does not contain any photo.'
+        	), 204);
+        }
 
         $uploadDir = $this->getParameter('photo_upload_dir');
-        $filename = $uploadDir . '/' . $album->getId() . '-' . $album->getTitle() . '.zip';
-        $zip = new \ZipArchive();
-
-        if ($zip->open($filename, \ZipArchive::CREATE) !== true) {
-          throw new \Exception('Cannot open or create ZIP archive for file ' . $filename);
+        $filename = $uploadDir . '/' . $album->getArchiveName();
+        
+        if (!file_exists($filename)) {
+        	throw new \Exception('Archive file ' . $filename . ' does not exist.');
         }
-
-        foreach ($album->getPhotos() as $photo) {
-          if ($zip->locateName($photo->getFilename()) === false) {
-            $zip->addFile($uploadDir . '/' . $photo->getFilename(), $photo->getFilename());
-          }
-        }
-
-        $zip->close();
 
         $response = new BinaryFileResponse($filename);
         $response->headers->set('Content-disposition', 'attachment;filename="' . $album->getTitle() . '.zip"');

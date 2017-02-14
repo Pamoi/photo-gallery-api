@@ -62,6 +62,12 @@ services:
         arguments: ["@doctrine.orm.entity_manager", "@logger", "%photo_upload_dir%"]
         tags:
             - { name: console.command }
+            
+    app.command.update_archives:
+        class: AppBundle\Command\UpdateArchivesCommand
+        arguments: ["@doctrine.orm.entity_manager", "@logger", "%photo_upload_dir%"]
+        tags:
+            - { name: console.command }
 
 # Listeners
     app.listener.photo_listener:
