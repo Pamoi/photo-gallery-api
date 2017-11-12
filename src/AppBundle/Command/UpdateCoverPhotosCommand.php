@@ -7,7 +7,7 @@ use AppBundle\Util\PhotoResizerInterface;
 use Doctrine\ORM\EntityManager;
 use Psr\Log\LoggerInterface;
 
-class UpdateResizedPhotosCommand extends AbstractPhotoUpdateCommand
+class UpdateCoverPhotosCommand extends AbstractPhotoUpdateCommand
 {
     private $uploadRootDir;
     private $resizeService;
@@ -31,17 +31,17 @@ class UpdateResizedPhotosCommand extends AbstractPhotoUpdateCommand
     protected function configure()
     {
         $this
-            ->setName('photos:update:resized')
-            ->setDescription('Updates the sized down version of all the photos')
+            ->setName('photos:update:cover')
+            ->setDescription('Updates the cover version of all the photos')
         ;
     }
 
     protected function updatePhoto(Photo $photo)
     {
-        $this->resizeService->resize(
+        $this->resizeService->cropToAspectRatio(
             $this->uploadRootDir . $photo->getFilename(),
-            $this->uploadRootDir . $photo->getResizedFilename(),
-            Photo::$MAX_RESIZED_WIDTH,
-            Photo::$MAX_RESIZED_HEIGHT);
+            $this->uploadRootDir . $photo->getCoverFilename(),
+            Photo::$COVER_ASPECT_RATIO,
+            Photo::$COVER_WIDTH);
     }
 }

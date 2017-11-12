@@ -59,10 +59,16 @@ services:
 
     app.command.update_resized_photos:
         class: AppBundle\Command\UpdateResizedPhotosCommand
-        arguments: ["@doctrine.orm.entity_manager", "@logger", "%photo_upload_dir%"]
+        arguments: ["@doctrine.orm.entity_manager", "@logger", "%photo_upload_dir%", "@app.services.photo_resizer"]
         tags:
             - { name: console.command }
-            
+
+    app.command.update_cover_photos:
+        class: AppBundle\Command\UpdateCoverPhotosCommand
+        arguments: ["@doctrine.orm.entity_manager", "@logger", "%photo_upload_dir%", "@app.services.photo_resizer"]
+        tags:
+            - { name: console.command }
+
     app.command.update_archives:
         class: AppBundle\Command\UpdateArchivesCommand
         arguments: ["@doctrine.orm.entity_manager", "@logger", "%photo_upload_dir%"]
@@ -72,7 +78,7 @@ services:
 # Listeners
     app.listener.photo_listener:
         class: AppBundle\EventListener\PhotoListener
-        arguments: ["%photo_upload_dir%"]
+        arguments: ["%photo_upload_dir%", "@app.services.photo_resizer"]
         tags:
             - { name: doctrine.orm.entity_listener }
 
@@ -90,3 +96,7 @@ services:
         class: AppBundle\EventListener\CorsResponseListener
         tags:
             - { name: kernel.event_listener, event: kernel.response }
+
+# Services
+    app.services.photo_resizer:
+        class: AppBundle\Util\ImagickPhotoResizer

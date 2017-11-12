@@ -4,6 +4,7 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\Photo;
 use AppBundle\Entity\PhotoComment;
+use AppBundle\Util\ImagickPhotoResizer;
 use AppBundle\Util\Util;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -54,6 +55,20 @@ class PhotoController extends Controller
 
         $uploadDir = $this->getParameter('photo_upload_dir');
         return new BinaryFileResponse($uploadDir . '/' . $photo->getResizedFilename());
+    }
+
+    /**
+     * @Route("/photo/{id}/cover", requirements={
+     *     "id": "\d+"
+     * })
+     * @Method({"GET", "OPTIONS"})
+     */
+    public function getPhotoCoverAction(Request $request, Photo $photo)
+    {
+        $this->denyAccessUnlessGranted('view', $photo, 'You are not allowed to view this photo.');
+
+        $uploadDir = $this->getParameter('photo_upload_dir');
+        return new BinaryFileResponse($uploadDir . '/' . $photo->getCoverFilename());
     }
 
     /**

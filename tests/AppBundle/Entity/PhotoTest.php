@@ -38,7 +38,8 @@ class PhotoTest extends \PHPUnit_Framework_TestCase
         $correct = array(
             '13.png',
             'thumb-13.png',
-            'resized-13.png'
+            'resized-13.png',
+            'cover-13.png'
         );
 
         $this->assertEquals($correct, $photo->getTempFileNames());

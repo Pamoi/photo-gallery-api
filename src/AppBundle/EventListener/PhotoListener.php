@@ -2,31 +2,30 @@
 
 namespace AppBundle\EventListener;
 
-use AppBundle\Util\ImagickPhotoResizer;
 use AppBundle\Entity\Photo;
+use AppBundle\Util\PhotoResizerInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 
 class PhotoListener
 {
-	private static $MAX_IMAGE_WIDTH = 1920;
-	private static $MAX_IMAGE_HEIGHT = 1080;
-	private static $THUMBNAIL_SIDE = 300;
-	
     private $uploadRootDir;
+    private $resizeService;
 
     /**
      * PhotoListener constructor.
      *
      * @param string $photoUploadDir The directory inside which the photo files will be saved.
+     * @param PhotoResizerInterface $resizeService The photo resizing service.
      */
-    public function __construct($photoUploadDir)
+    public function __construct($photoUploadDir, PhotoResizerInterface $resizeService)
     {
         if (substr($photoUploadDir, -1) != '/') {
             $photoUploadDir = $photoUploadDir . '/';
         }
 
         $this->uploadRootDir = $photoUploadDir;
+        $this->resizeService = $resizeService;
     }
 
     /**
@@ -52,17 +51,18 @@ class PhotoListener
 
         // Save and resize photo
         $photo->getFile()->move($this->uploadRootDir, $photo->getFilename());
+        $filename = $this->uploadRootDir . $photo->getFilename();
 
-        $resizer = new ImagickPhotoResizer($this->uploadRootDir . $photo->getFilename());
-
-        $resizer->resize($this->uploadRootDir . $photo->getResizedFilename(),
-        		static::$MAX_IMAGE_WIDTH, static::$MAX_IMAGE_HEIGHT);
-        $resizer->resizeToSquare($this->uploadRootDir . $photo->getThumbFilename(),
-        		static::$THUMBNAIL_SIDE);
+        $this->resizeService->resize($filename, $this->uploadRootDir . $photo->getResizedFilename(),
+        		Photo::$MAX_RESIZED_WIDTH, Photo::$MAX_RESIZED_HEIGHT);
+        $this->resizeService->resizeToSquare($filename, $this->uploadRootDir . $photo->getThumbFilename(),
+        		Photo::$THUMBNAIL_SIDE);
+        $this->resizeService->cropToAspectRatio($filename, $this->uploadRootDir . $photo->getCoverFilename(),
+                Photo::$COVER_ASPECT_RATIO, Photo::$COVER_WIDTH);
 
         $photo->setFile(null);
         
-        // Add photo to ablum archive        
+        // Add photo to album archive
         $photoFilename = $this->uploadRootDir . $photo->getFilename();
         $zip = $this->openAlbumArchive($photo);
         

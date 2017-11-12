@@ -15,6 +15,41 @@ use Symfony\Component\Validator\Constraints as Assert;
 class Photo implements PublicJsonInterface
 {
     /**
+     * @var int
+     *
+     * Maximum width for the sized down version of a photo.
+     */
+    public static $MAX_RESIZED_WIDTH = 1920;
+
+    /**
+     * @var int
+     *
+     * Maximum height for the sized down version of a photo.
+     */
+    public static $MAX_RESIZED_HEIGHT = 1080;
+
+    /**
+     * @var int
+     *
+     * Length of the side of the square thumbnail of a photo.
+     */
+    public static $THUMBNAIL_SIDE = 300;
+
+    /**
+     * @var float
+     *
+     * Aspect ratio of the cropped and resized cover version of a photo.
+     */
+    public static $COVER_ASPECT_RATIO = 1.7;
+
+    /**
+     * @var int
+     *
+     * Width of the cropped and resized cover version of a photo.
+     */
+    public static $COVER_WIDTH = 1110;
+
+    /**
      * @var string $MIN_PREFIX
      *
      * Prefix to append before the file name of the photo for the thumbnail version.
@@ -22,11 +57,18 @@ class Photo implements PublicJsonInterface
     private static $MIN_PREFIX = 'thumb-';
 
     /**
-     * @var string RESIZED_PREFIX
+     * @var string $RESIZED_PREFIX
      *
      * Prefix to append before the file name of the photo for the resized version.
      */
     private static $RESIZED_PREFIX = 'resized-';
+
+    /**
+     * @var string $COVER_PREFIX
+     *
+     * Prefix to append before the file name of the photo for the cover version.
+     */
+    private static $COVER_PREFIX = 'cover-';
 
     /**
      * @ORM\Column(type="integer")
@@ -309,7 +351,8 @@ class Photo implements PublicJsonInterface
         $this->tempFileNames = array(
             $this->getFilename(),
             $this->getThumbFilename(),
-            $this->getResizedFilename()
+            $this->getResizedFilename(),
+            $this->getCoverFilename()
         );
 
         return $this;
@@ -381,5 +424,17 @@ class Photo implements PublicJsonInterface
         return (null === $this->id OR null === $this->extension)
             ? null
             : static::$RESIZED_PREFIX . $this->id . '.' . $this->extension;
+    }
+
+    /**
+     * Get the file name of a cropped and scaled version of this photo.
+     *
+     * @return null|string
+     */
+    public function getCoverFilename()
+    {
+        return (null === $this->id OR null === $this->extension)
+            ? null
+            : static::$COVER_PREFIX . $this->id . '.' . $this->extension;
     }
 }

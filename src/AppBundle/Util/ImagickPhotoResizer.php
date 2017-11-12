@@ -4,28 +4,15 @@ namespace AppBundle\Util;
 
 class ImagickPhotoResizer implements PhotoResizerInterface
 {
-    private $img;
-
-    public function __construct($inputFilePath)
+    public function resize($inputFile, $outputFile, $maxWidth, $maxHeight)
     {
-        $this->img = new \Imagick($inputFilePath);
-        $this->autoRotate($this->img);
-    }
+        $img = new \Imagick($inputFile);
+        $this->autoRotate($img);
 
-    public function setInputFile($inputFilePath)
-    {
-        $this->img = new \Imagick($inputFilePath);
-        $this->autoRotate($this->img);
-
-        return $this;
-    }
-
-    public function resize($outputFilePath, $maxWidth, $maxHeight)
-    {
         try {
-            $aspectRatio = $this->img->getImageWidth() / $this->img->getImageHeight();
-            $width = $this->img->getImageWidth();
-            $height = $this->img->getImageHeight();
+            $aspectRatio = $img->getImageWidth() / $img->getImageHeight();
+            $width = $img->getImageWidth();
+            $height = $img->getImageHeight();
 
             if ($width > $maxWidth) {
                 $width = $maxWidth;
@@ -37,28 +24,51 @@ class ImagickPhotoResizer implements PhotoResizerInterface
                 $width = $height * $aspectRatio;
             }
 
-            $this->img->scaleImage($width, $height);
-            $this->img->writeImage($outputFilePath);
+            $img->scaleImage($width, $height);
+            $img->writeImage($outputFile);
         } catch (\ImagickException $e) {
             throw new PhotoResizingException($e);
         }
     }
 
-    public function scale($outputFilePath, $scale)
+    public function scale($inputFile, $outputFile, $scale)
     {
+        $img = new \Imagick($inputFile);
+        $this->autoRotate($img);
+
         try {
-            $this->img->scaleImage($this->img->getImageWidth() * $scale, 0);
-            $this->img->writeImage($outputFilePath);
+            $img->scaleImage($img->getImageWidth() * $scale, 0);
+            $img->writeImage($outputFile);
         } catch (\ImagickException $e) {
             throw new PhotoResizingException($e);
         }
     }
 
-    public function resizeToSquare($outputFilePath, $side)
+    public function resizeToSquare($inputFile, $outputFile, $side)
     {
+        $img = new \Imagick($inputFile);
+        $this->autoRotate($img);
+
         try {
-            $this->img->cropThumbnailImage($side, $side);
-            $this->img->writeImage($outputFilePath);
+            $img->cropThumbnailImage($side, $side);
+            $img->writeImage($outputFile);
+        } catch (\ImagickException $e) {
+            throw new PhotoResizingException($e);
+        }
+    }
+
+    public function cropToAspectRatio($inputFile, $outputFile, $aspectRatio, $maxWidth)
+    {
+        $img = new \Imagick($inputFile);
+        $this->autoRotate($img);
+
+        if ($img->getImageWidth() < $maxWidth) {
+            $maxWidth = $img->getImageWidth();
+        }
+
+        try {
+            $img->cropThumbnailImage($maxWidth, $maxWidth / $aspectRatio);
+            $img->writeImage($outputFile);
         } catch (\ImagickException $e) {
             throw new PhotoResizingException($e);
         }

@@ -73,7 +73,7 @@ class PhotoControllerTest extends CommandWebTestCase
 
         // Upload a photo
         $copyPath = 'photo.jpg';
-        copy(__DIR__ . '/test_file.jpg', $copyPath);
+        copy(__DIR__ . '/../test_file.jpg', $copyPath);
 
         $client->request(
             'POST',
@@ -123,7 +123,7 @@ class PhotoControllerTest extends CommandWebTestCase
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
         $this->assertEquals('image/jpeg', $client->getResponse()->headers->get('Content-Type'));
 
-        // Get thumbnail and resized versions
+        // Get thumbnail, resized and cover versions
         $client->request(
             'GET',
             '/photo/' . self::$photoId . '/thumb',
@@ -140,6 +140,19 @@ class PhotoControllerTest extends CommandWebTestCase
         $client->request(
             'GET',
             '/photo/' . self::$photoId . '/resized',
+            array(),
+            array(),
+            array(
+                'HTTP_X_AUTH_TOKEN' => self::$token
+            )
+        );
+
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+        $this->assertEquals('image/jpeg', $client->getResponse()->headers->get('Content-Type'));
+
+        $client->request(
+            'GET',
+            '/photo/' . self::$photoId . '/cover',
             array(),
             array(),
             array(
@@ -181,9 +194,9 @@ class PhotoControllerTest extends CommandWebTestCase
         $client = static::createClient();
 
         $copyPath1 = 'photo1.jpg';
-        copy(__DIR__ . '/test_file.jpg', $copyPath1);
+        copy(__DIR__ . '/../test_file.jpg', $copyPath1);
         $copyPath2 = 'photo2.jpg';
-        copy(__DIR__ . '/test_file.jpg', $copyPath2);
+        copy(__DIR__ . '/../test_file.jpg', $copyPath2);
 
         $client->request(
             'POST',
