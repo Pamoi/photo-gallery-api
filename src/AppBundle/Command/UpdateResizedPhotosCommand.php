@@ -3,7 +3,7 @@
 namespace AppBundle\Command;
 
 use AppBundle\Entity\Photo;
-use AppBundle\Util\PhotoResizerInterface;
+use AppBundle\Service\PhotoResizer\PhotoResizerInterface;
 use Doctrine\ORM\EntityManager;
 use Psr\Log\LoggerInterface;
 

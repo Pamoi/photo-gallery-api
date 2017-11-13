@@ -99,4 +99,4 @@ services:
 
 # Services
     app.services.photo_resizer:
-        class: AppBundle\Util\ImagickPhotoResizer
+        class: AppBundle\Service\PhotoResizer\ImagickPhotoResizer

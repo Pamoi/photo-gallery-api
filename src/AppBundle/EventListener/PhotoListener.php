@@ -3,7 +3,7 @@
 namespace AppBundle\EventListener;
 
 use AppBundle\Entity\Photo;
-use AppBundle\Util\PhotoResizerInterface;
+use AppBundle\Service\PhotoResizer\PhotoResizerInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 

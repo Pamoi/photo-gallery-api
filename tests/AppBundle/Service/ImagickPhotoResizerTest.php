@@ -1,8 +1,9 @@
 <?php
 
-namespace Tests\AppBundle\Util;
+namespace Tests\AppBundle\Service;
 
-use AppBundle\Util\ImagickPhotoResizer;
+
+use AppBundle\Service\PhotoResizer\ImagickPhotoResizer;
 
 class ImagickPhotoResizerTest extends \PHPUnit_Framework_TestCase {
 

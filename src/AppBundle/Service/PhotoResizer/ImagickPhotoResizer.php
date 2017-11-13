@@ -1,6 +1,6 @@
 <?php
 
-namespace AppBundle\Util;
+namespace AppBundle\Service\PhotoResizer;
 
 class ImagickPhotoResizer implements PhotoResizerInterface
 {

@@ -1,7 +1,6 @@
 <?php
 
-namespace AppBundle\Util;
-
+namespace AppBundle\Service\PhotoResizer;
 
 class PhotoResizingException extends \Exception
 {
