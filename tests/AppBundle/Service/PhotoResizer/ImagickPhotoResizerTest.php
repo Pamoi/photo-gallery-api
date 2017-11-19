@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\AppBundle\Service;
+namespace Tests\AppBundle\ServicePhotoResizer;
 
 
 use AppBundle\Service\PhotoResizer\ImagickPhotoResizer;
@@ -9,7 +9,7 @@ class ImagickPhotoResizerTest extends \PHPUnit_Framework_TestCase {
 
     public function testResize() {
         $resizer = new ImagickPhotoResizer();
-        $inputFile = __DIR__ . '/../test_file.jpg';
+        $inputFile = __DIR__ . '/../../test_file.jpg';
         $outputFile = sys_get_temp_dir() . '/test_photo.jpg';
         $maxWidth = 300;
         $maxHeight = 300;
@@ -25,7 +25,7 @@ class ImagickPhotoResizerTest extends \PHPUnit_Framework_TestCase {
 
     public function testThumbnail() {
         $resizer = new ImagickPhotoResizer();
-        $inputFile = __DIR__ . '/../test_file.jpg';
+        $inputFile = __DIR__ . '/../../test_file.jpg';
         $outputFile = sys_get_temp_dir() . '/test_photo.jpg';
         $thumbnailSize = 300;
 
@@ -39,7 +39,7 @@ class ImagickPhotoResizerTest extends \PHPUnit_Framework_TestCase {
 
     public function testScale() {
         $resizer = new ImagickPhotoResizer();
-        $inputFile = __DIR__ . '/../test_file.jpg';
+        $inputFile = __DIR__ . '/../../test_file.jpg';
         $outputFile = sys_get_temp_dir() . '/test_photo.jpg';
         $scale = 0.1;
 
@@ -53,7 +53,7 @@ class ImagickPhotoResizerTest extends \PHPUnit_Framework_TestCase {
 
     public function testCropToAspectRatio() {
         $resizer = new ImagickPhotoResizer();
-        $inputFile = __DIR__ . '/../test_file.jpg';
+        $inputFile = __DIR__ . '/../../test_file.jpg';
         $outputFile = sys_get_temp_dir() . '/test_photo.jpg';
         $aspectRatio = 1.0;
         $maxWidth = 300;

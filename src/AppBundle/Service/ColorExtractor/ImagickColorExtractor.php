@@ -10,7 +10,8 @@ class ImagickColorExtractor implements ColorExtractorInterface
      * Extract the dominant color from an image.
      *
      * @param $inputFile string The file name of the image.
-     * @return array The red, green and blue values of the dominant color.
+     * @return string The hex string representing the color.
+     * @throws ColorExtractionException
      */
     public function extractMainColor($inputFile)
     {
@@ -31,7 +32,10 @@ class ImagickColorExtractor implements ColorExtractorInterface
                 }
             }
 
-            return array($topColor['r'], $topColor['g'], $topColor['b']);
+            return "#" .
+                substr("0".dechex($topColor['r']),-2) .
+                substr("0".dechex($topColor['g']),-2) .
+                substr("0".dechex($topColor['b']),-2);
         }
     }
 }
