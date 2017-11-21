@@ -26,7 +26,8 @@
         "sensio/distribution-bundle": "^5.0",
         "sensio/framework-extra-bundle": "^5.0",
         "incenteev/composer-parameter-handler": "^2.1",
-        "firebase/php-jwt": "^5.0"
+        "firebase/php-jwt": "^5.0",
+        "league/color-extractor": "0.3.*"
     },
     "require-dev": {
         "symfony/web-server-bundle": "^3.3",

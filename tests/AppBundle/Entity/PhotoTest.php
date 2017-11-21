@@ -59,6 +59,7 @@ class PhotoTest extends \PHPUnit_Framework_TestCase
         $photo->setUploadDate($creationDate);
         $photo->setExtension('jpg');
         $photo->setAuthor($author);
+        $photo->setDominantColor('#123456');
 
         $correct = array(
             'id' => 22,
@@ -69,6 +70,7 @@ class PhotoTest extends \PHPUnit_Framework_TestCase
                 'username' => 'Toto'
             ),
             'comments' => array(),
+            'dominantColor' => '#123456',
         );
 
         $this->assertEquals($correct, $photo->toJson());

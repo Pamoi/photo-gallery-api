@@ -120,6 +120,11 @@ class Photo implements PublicJsonInterface
     private $extension;
 
     /**
+     * @ORM\Column(type="string", length=7)
+     */
+    private $dominantColor;
+
+    /**
      * @Assert\Image(maxSize="20M")
      */
     private $file;
@@ -150,6 +155,7 @@ class Photo implements PublicJsonInterface
         $this->comments = new ArrayCollection();
         $this->date = new \DateTime();
         $this->uploadDate = new \DateTime();
+        $this->dominantColor = '#000000';
     }
 
     /**
@@ -342,6 +348,27 @@ class Photo implements PublicJsonInterface
     }
 
     /**
+     * Get the dominant color of the image as a string.
+     *
+     * @return string
+     */
+    public function getDominantColor() {
+        return $this->dominantColor;
+    }
+
+    /**
+     * Set the dominant color of the image.
+     *
+     * @param string $dominantColor
+     * @return Photo
+     */
+    public function setDominantColor($dominantColor) {
+        $this->dominantColor = $dominantColor;
+
+        return $this;
+    }
+
+    /**
      * Store all names of the files used by this photo in a temporary variable.
      *
      * @return Photo
@@ -385,6 +412,7 @@ class Photo implements PublicJsonInterface
             'uploadDate' => $this->getUploadDate()->format(\DateTime::ISO8601),
             'author' => $this->getAuthor()->toJson(),
             'comments' => $comments,
+            'dominantColor' => $this->getDominantColor(),
         );
 
         return $data;

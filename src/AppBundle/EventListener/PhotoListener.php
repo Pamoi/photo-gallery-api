@@ -3,6 +3,7 @@
 namespace AppBundle\EventListener;
 
 use AppBundle\Entity\Photo;
+use AppBundle\Service\ColorExtractor\ColorExtractorInterface;
 use AppBundle\Service\PhotoResizer\PhotoResizerInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Event\LifecycleEventArgs;
@@ -11,14 +12,19 @@ class PhotoListener
 {
     private $uploadRootDir;
     private $resizeService;
+    private $colorExtractor;
 
     /**
      * PhotoListener constructor.
      *
      * @param string $photoUploadDir The directory inside which the photo files will be saved.
      * @param PhotoResizerInterface $resizeService The photo resizing service.
+     * @param ColorExtractorInterface $colorExtractor The color extraction service.
      */
-    public function __construct($photoUploadDir, PhotoResizerInterface $resizeService)
+    public function __construct(
+        $photoUploadDir,
+        PhotoResizerInterface $resizeService,
+        ColorExtractorInterface $colorExtractor)
     {
         if (substr($photoUploadDir, -1) != '/') {
             $photoUploadDir = $photoUploadDir . '/';
@@ -26,6 +32,7 @@ class PhotoListener
 
         $this->uploadRootDir = $photoUploadDir;
         $this->resizeService = $resizeService;
+        $this->colorExtractor = $colorExtractor;
     }
 
     /**
@@ -60,8 +67,12 @@ class PhotoListener
         $this->resizeService->cropToAspectRatio($filename, $this->uploadRootDir . $photo->getCoverFilename(),
                 Photo::$COVER_ASPECT_RATIO, Photo::$COVER_WIDTH);
 
+        // Extract and store the dominant color of the photo
+        $color = $this->colorExtractor->extractMainColor($this->uploadRootDir . $photo->getCoverFilename());
+        $photo->setDominantColor($color);
+
         $photo->setFile(null);
-        
+
         // Add photo to album archive
         $photoFilename = $this->uploadRootDir . $photo->getFilename();
         $zip = $this->openAlbumArchive($photo);
@@ -72,6 +83,8 @@ class PhotoListener
         }
         
         $zip->close();
+
+        $event->getEntityManager()->flush($photo);
     }
 
     /**

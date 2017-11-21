@@ -69,6 +69,12 @@ services:
         tags:
             - { name: console.command }
 
+    app.command.update_photos_color:
+        class: AppBundle\Command\UpdatePhotoColorCommand
+        arguments: ["@doctrine.orm.entity_manager", "@logger", "%photo_upload_dir%", "@app.services.color_extractor"]
+        tags:
+            - { name: console.command }
+
     app.command.update_archives:
         class: AppBundle\Command\UpdateArchivesCommand
         arguments: ["@doctrine.orm.entity_manager", "@logger", "%photo_upload_dir%"]
@@ -78,14 +84,14 @@ services:
 # Listeners
     app.listener.photo_listener:
         class: AppBundle\EventListener\PhotoListener
-        arguments: ["%photo_upload_dir%", "@app.services.photo_resizer"]
+        arguments: ["%photo_upload_dir%", "@app.services.photo_resizer", "@app.services.color_extractor"]
         tags:
             - { name: doctrine.orm.entity_listener }
 
-    app.listener.exception_listener:
-        class: AppBundle\EventListener\ExceptionListener
-        tags:
-            - { name: kernel.event_listener, event: kernel.exception }
+#    app.listener.exception_listener:
+ #       class: AppBundle\EventListener\ExceptionListener
+  #      tags:
+   #         - { name: kernel.event_listener, event: kernel.exception }
 
     app.listener.cors_request_listener:
         class: AppBundle\EventListener\CorsRequestListener
@@ -100,3 +106,6 @@ services:
 # Services
     app.services.photo_resizer:
         class: AppBundle\Service\PhotoResizer\ImagickPhotoResizer
+
+    app.services.color_extractor:
+        class: AppBundle\Service\ColorExtractor\LeagueColorExtractor

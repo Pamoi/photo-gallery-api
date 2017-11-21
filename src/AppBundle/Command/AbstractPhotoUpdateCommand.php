@@ -36,6 +36,7 @@ abstract class AbstractPhotoUpdateCommand extends Command
         foreach ($photos as $photo) {
             try {
                 $this->updatePhoto($photo);
+                $this->em->persist($photo);
             } catch (\Exception $e) {
                 $this->logger->error(
                     "Error while updating photos with command " . $this->getName() . ': ' . $e->getMessage());
@@ -44,6 +45,8 @@ abstract class AbstractPhotoUpdateCommand extends Command
 
             $progressBar->advance();
         }
+
+        $this->em->flush();
 
         $progressBar->finish();
         $output->writeln("");
