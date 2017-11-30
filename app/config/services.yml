@@ -88,10 +88,15 @@ services:
         tags:
             - { name: doctrine.orm.entity_listener }
 
-#    app.listener.exception_listener:
- #       class: AppBundle\EventListener\ExceptionListener
-  #      tags:
-   #         - { name: kernel.event_listener, event: kernel.exception }
+    app.listener.exception_listener:
+        class: AppBundle\EventListener\ExceptionListener
+        tags:
+            - { name: kernel.event_listener, event: kernel.exception }
+
+    app.listener.json_body_listener:
+        class: AppBundle\EventListener\JsonBodyRequestListener
+        tags:
+            - { name: kernel.event_listener, event: kernel.request }
 
     app.listener.cors_request_listener:
         class: AppBundle\EventListener\CorsRequestListener
