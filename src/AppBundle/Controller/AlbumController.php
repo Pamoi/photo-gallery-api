@@ -272,7 +272,7 @@ class AlbumController extends Controller
         $errors = $validator->validate($album);
 
         if (count($errors) > 0) {
-            return new JsonResponse(Util::violationListToJson($errors));
+            return new JsonResponse(Util::violationListToJson($errors), 422);
         }
 
         $em = $this->getDoctrine()->getManager();
