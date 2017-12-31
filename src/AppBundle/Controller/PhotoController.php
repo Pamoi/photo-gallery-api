@@ -176,7 +176,7 @@ class PhotoController extends Controller
         $errors = $validator->validate($photo);
 
         if (count($errors) > 0) {
-            return new JsonResponse(Util::violationListToJson($errors));
+            return new JsonResponse(Util::violationListToJson($errors), 422);
         }
 
         $em = $this->getDoctrine()->getManager();
