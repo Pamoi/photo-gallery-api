@@ -27,7 +27,7 @@ class Comment implements PublicJsonInterface
     /**
      * @ORM\Column(type="text")
      *
-     * @Assert\Length(min=2, max=10000)
+     * @Assert\Length(min=1, max=10000)
      */
     private $text;
 
