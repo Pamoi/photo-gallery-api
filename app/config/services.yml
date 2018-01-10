@@ -90,6 +90,7 @@ services:
 
     app.listener.exception_listener:
         class: AppBundle\EventListener\ExceptionListener
+        arguments: ["@logger"]
         tags:
             - { name: kernel.event_listener, event: kernel.exception }
 
