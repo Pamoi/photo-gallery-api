@@ -21,5 +21,5 @@ parameters:
     # Directory where the uploaded photos will be stored
     photo_upload_dir: "%kernel.root_dir%/../upload"
 
-    # CORS Access-Control-Allow-Origin (supports comma separated values)
+    # CORS Access-Control-Allow-Origin (leave empty to disable CORS)
     cors_allow_origin: "*"
