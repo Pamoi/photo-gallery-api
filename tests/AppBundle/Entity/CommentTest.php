@@ -5,7 +5,7 @@ namespace Tests\AppBundle\Entity;
 use AppBundle\Entity\Comment;
 use AppBundle\Entity\User;
 
-class CommentTest extends \PHPUnit_Framework_TestCase
+class CommentTest extends \PHPUnit\Framework\TestCase
 {
     public function testConstruct()
     {

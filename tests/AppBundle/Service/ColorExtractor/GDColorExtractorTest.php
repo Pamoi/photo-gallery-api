@@ -5,7 +5,7 @@ namespace Tests\AppBundle\Service\ColorExtractor;
 
 use AppBundle\Service\ColorExtractor\GDColorExtractor;
 
-class GDColorExtractorTest extends \PHPUnit_Framework_TestCase {
+class GDColorExtractorTest extends \PHPUnit\Framework\TestCase {
 
     public function testExtractMainColor() {
         $extractor = new GDColorExtractor();

@@ -5,7 +5,7 @@ namespace Tests\AppBundle\ServicePhotoResizer;
 
 use AppBundle\Service\PhotoResizer\ImagickPhotoResizer;
 
-class ImagickPhotoResizerTest extends \PHPUnit_Framework_TestCase {
+class ImagickPhotoResizerTest extends \PHPUnit\Framework\TestCase {
 
     public function testResize() {
         $resizer = new ImagickPhotoResizer();

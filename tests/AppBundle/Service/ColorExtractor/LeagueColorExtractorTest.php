@@ -5,7 +5,7 @@ namespace Tests\AppBundle\Service\ColorExtractor;
 
 use AppBundle\Service\ColorExtractor\LeagueColorExtractor;
 
-class LeagueColorExtractorTest extends \PHPUnit_Framework_TestCase {
+class LeagueColorExtractorTest extends \PHPUnit\Framework\TestCase {
 
     public function testExtractMainColor() {
         $extractor = new LeagueColorExtractor();

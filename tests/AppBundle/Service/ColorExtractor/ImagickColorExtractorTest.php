@@ -5,7 +5,7 @@ namespace Tests\AppBundle\Service\ColorExtractor;
 
 use AppBundle\Service\ColorExtractor\ImagickColorExtractor;
 
-class ImagickColorExtractorTest extends \PHPUnit_Framework_TestCase {
+class ImagickColorExtractorTest extends \PHPUnit\Framework\TestCase {
 
     public function testExtractMainColor() {
         $extractor = new ImagickColorExtractor();

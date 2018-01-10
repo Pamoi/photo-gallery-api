@@ -5,7 +5,7 @@ namespace Tests\AppBundle\Entity;
 use AppBundle\Entity\Photo;
 use AppBundle\Entity\User;
 
-class PhotoTest extends \PHPUnit_Framework_TestCase
+class PhotoTest extends \PHPUnit\Framework\TestCase
 {
     public function testConstruct()
     {
