@@ -105,6 +105,7 @@ services:
 
     app.listener.cors_response_listener:
         class: AppBundle\EventListener\CorsResponseListener
+        arguments: ["%cors_allow_origin%"]
         tags:
             - { name: kernel.event_listener, event: kernel.response }
 

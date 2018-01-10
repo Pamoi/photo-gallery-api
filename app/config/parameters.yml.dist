@@ -19,4 +19,7 @@ parameters:
     secret:            ThisTokenIsNotSoSecretChangeIt
 
     # Directory where the uploaded photos will be stored
-    photo_upload_dir: "%kernel.root_dir%/../web/photos"
+    photo_upload_dir: "%kernel.root_dir%/../upload"
+
+    # CORS Access-Control-Allow-Origin (supports comma separated values)
+    cors_allow_origin: "*"

@@ -3,11 +3,18 @@
 namespace AppBundle\EventListener;
 
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
-use Symfony\Component\HttpFoundation\Response;
 
 class CorsResponseListener
 {
-    // From http://www.hydrant.co.uk/tech/cors-pre-flight-requests-and-headers-symfony-httpkernel-component
+    private $allowOrigin;
+    private $allowedOrigins;
+
+    public function __construct($allowOrigin)
+    {
+        $this->allowOrigin = $allowOrigin;
+        $this->allowedOrigins = array_map(function ($o) { return trim($o); }, explode(",", $this->allowOrigin));
+    }
+
     public function onKernelResponse(FilterResponseEvent $event)
     {
         if (!$event->isMasterRequest()) {
@@ -15,7 +22,17 @@ class CorsResponseListener
         }
 
         $response = $event->getResponse();
-        $response->headers->set('Access-Control-Allow-Origin', '*');
+
+        if ($this->allowOrigin === "*") {
+            $response->headers->set('Access-Control-Allow-Origin', $this->allowOrigin);
+        } else {
+            $origin = $event->getRequest()->headers->get("Origin");
+
+            if (in_array($origin, $this->allowedOrigins)) {
+                $response->headers->set('Access-Control-Allow-Origin', $origin);
+            }
+        }
+
         $response->headers->set('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE');
         $response->headers->set('Access-Control-Allow-Headers', 'Content-Type,X-AUTH-TOKEN,x-auth-token');
     }
