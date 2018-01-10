@@ -68,8 +68,8 @@ class PhotoListener
                 Photo::$COVER_ASPECT_RATIO, Photo::$COVER_WIDTH);
 
         // Extract and store the dominant color of the photo
-        $color = $this->colorExtractor->extractMainColor($this->uploadRootDir . $photo->getCoverFilename());
-        $photo->setDominantColor($color);
+        // $color = $this->colorExtractor->extractMainColor($this->uploadRootDir . $photo->getCoverFilename());
+        // $photo->setDominantColor($color);
 
         $photo->setFile(null);
 
