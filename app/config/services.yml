@@ -81,6 +81,12 @@ services:
         tags:
             - { name: console.command }
 
+    app.command.import_albums:
+        class: AppBundle\Command\ImportAlbumCommand
+        arguments: ["@doctrine.orm.entity_manager", "@logger", "%photo_upload_dir%"]
+        tags:
+            - { name: console.command }
+
 # Listeners
     app.listener.photo_listener:
         class: AppBundle\EventListener\PhotoListener
