@@ -70,21 +70,25 @@ class ImportAlbumCommand extends Command
             }
 
             foreach ($album['photos'] as $photo) {
-                $p = new Photo();
+                try {
+                    $p = new Photo();
 
-                $p->setAuthor($user_map[$photo['authorId']]);
-                $date = new \DateTime($photo['uploadDate']);
-                $p->setDate($date);
-                $p->setUploadDate($date);
-                $file = new UploadedFile($input->getArgument('path') . '/' . $photo['filename'],
-                    $photo['filename'],
-                    'image/jpeg',
-                    null,
-                    null,
-                    true);
-                $p->setFile($file);
+                    $p->setAuthor($user_map[$photo['authorId']]);
+                    $date = new \DateTime($photo['uploadDate']);
+                    $p->setDate($date);
+                    $p->setUploadDate($date);
+                    $file = new UploadedFile($input->getArgument('path') . '/' . $photo['filename'],
+                        $photo['filename'],
+                        'image/jpeg',
+                        null,
+                        null,
+                        true);
+                    $p->setFile($file);
 
-                $a->addPhoto($p);
+                    $a->addPhoto($p);
+                } catch (\Exception $e) {
+                    $output->writeln('An error occurred while creating photo: ' . $e->getMessage());
+                }
             }
 
             foreach ($album['comments'] as $comment) {
@@ -106,7 +110,7 @@ class ImportAlbumCommand extends Command
         $progressBar->finish();
         $this->logger->info('Imported albums.');
 
-        $output->writeln('\n');
+        $output->writeln('');
         $output->writeln('<info>Done</info>');
     }
 
