@@ -15,6 +15,10 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class AlbumController extends Controller
 {
+    private static $NEW_ALBUMS_LIMIT = 25;
+    private static $OLD_ALBUMS_LIMIT = 5;
+    private static $ALBUMS_PER_PAGE = 5;
+
     /**
      * @Route("/album/{id}", requirements={
      *     "id": "\d+"
@@ -29,7 +33,44 @@ class AlbumController extends Controller
     }
 
     /**
-     * @Route("/album/list/{page}", defaults={"page": 1}, requirements={
+     * @Route("/album/list")
+     * @Method({"GET", "OPTIONS"})
+     */
+    public function getAlbumsByDateAction(Request $request)
+    {
+        $repo = $this->getDoctrine()->getRepository('AppBundle:Album');
+
+        $after = true;
+        $dateString = $request->query->get('after', null);
+
+        if ($dateString === null) {
+            $after = false;
+            $dateString = $request->query->get('before', null);
+        }
+
+        try {
+            $date = new \DateTime($dateString);
+        } catch (\Exception $e) {
+            return new JsonResponse(array(
+                'message' => 'Invalid arguments.',
+                'list' => array('date: Unable to parse string.')
+            ), 422);
+        }
+
+        if ($after) {
+            $albums = $repo->afterDate($date, AlbumController::$NEW_ALBUMS_LIMIT);
+        } else {
+            $albums = $repo->beforeDate($date, AlbumController::$OLD_ALBUMS_LIMIT);
+        }
+
+        $albums = array_filter($albums, $this->getIsGrantedFilter('view'));
+        $data = array_map($this->getJsonMapper(), $albums);
+
+        return new JsonResponse($data);
+    }
+
+    /**
+     * @Route("/album/list/{page}", requirements={
      *     "page": "\d+"
      * })
      * @Method({"GET", "OPTIONS"})
@@ -38,7 +79,7 @@ class AlbumController extends Controller
     {
         $repo = $this->getDoctrine()->getRepository('AppBundle:Album');
 
-        $albums = $repo->loadPage($page, 5);
+        $albums = $repo->loadPage($page, AlbumController::$ALBUMS_PER_PAGE);
 
         if (count($albums) == 0) {
             throw new NotFoundHttpException('There is no album at this page.');

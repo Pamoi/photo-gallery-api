@@ -121,13 +121,91 @@ class AlbumControllerTest extends CommandWebTestCase
     /**
      * @depends testPostAlbum
      */
-    public function testGetAlbum()
+    public function testGetAlbumsAfterDate()
+    {
+        $client = static::createClient();
+        $date = new \DateTime();
+        $interval = new \DateInterval('PT1M');
+        $date->sub($interval);
+
+        $client->request(
+            'GET',
+            '/album/list',
+            array('after' => $date->format(\DateTime::ISO8601)),
+            array(),
+            array(
+                'HTTP_X_AUTH_TOKEN' => self::$token
+            )
+        );
+
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+        $json = json_decode($client->getResponse()->getContent(), true);
+
+        $this->assertEquals(1, count($json));
+        $this->assertEquals(self::$albumId, $json[0]['id']);
+    }
+
+    /**
+     * @depends testPostAlbum
+     */
+    public function testGetAlbumsBeforeDate()
+    {
+        $client = static::createClient();
+        $date = new \DateTime();
+        $interval = new \DateInterval('PT1M');
+        $date->add($interval);
+
+        $client->request(
+            'GET',
+            '/album/list',
+            array('before' => $date->format(\DateTime::ISO8601)),
+            array(),
+            array(
+                'HTTP_X_AUTH_TOKEN' => self::$token
+            )
+        );
+
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+        $json = json_decode($client->getResponse()->getContent(), true);
+
+        $this->assertEquals(1, count($json));
+        $this->assertEquals(self::$albumId, $json[0]['id']);
+    }
+
+    /**
+     * @depends testPostAlbum
+     */
+    public function testGetAlbumsInvalidDate()
     {
         $client = static::createClient();
 
         $client->request(
             'GET',
             '/album/list',
+            array('before' => 'sbnepwoeero'),
+            array(),
+            array(
+                'HTTP_X_AUTH_TOKEN' => self::$token
+            )
+        );
+
+        $this->assertEquals(422, $client->getResponse()->getStatusCode());
+        $json = json_decode($client->getResponse()->getContent(), true);
+
+        $this->assertEquals('Invalid arguments.', $json['message']);
+        $this->assertEquals('date: Unable to parse string.', $json['list'][0]);
+    }
+
+    /**
+     * @depends testPostAlbum
+     */
+    public function testGetAlbum()
+    {
+        $client = static::createClient();
+
+        $client->request(
+            'GET',
+            '/album/list/1',
             array(),
             array(),
             array(
@@ -254,7 +332,7 @@ class AlbumControllerTest extends CommandWebTestCase
         // Test when getting the album from the album list
         $client->request(
             'GET',
-            '/album/list',
+            '/album/list/1',
             array(),
             array(),
             array(
@@ -360,7 +438,7 @@ class AlbumControllerTest extends CommandWebTestCase
 
         $client->request(
             'GET',
-            '/album/list',
+            '/album/list/1',
             array(),
             array(),
             array(
