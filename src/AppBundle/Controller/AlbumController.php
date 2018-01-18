@@ -61,6 +61,10 @@ class AlbumController extends Controller
             $albums = $repo->afterDate($date, AlbumController::$NEW_ALBUMS_LIMIT);
         } else {
             $albums = $repo->beforeDate($date, AlbumController::$OLD_ALBUMS_LIMIT);
+
+            if (count($albums) === 0) {
+                throw new NotFoundHttpException('There is no album before this date.');
+            }
         }
 
         $albums = array_filter($albums, $this->getIsGrantedFilter('view'));

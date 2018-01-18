@@ -175,6 +175,32 @@ class AlbumControllerTest extends CommandWebTestCase
     /**
      * @depends testPostAlbum
      */
+    public function testGetAlbumsBeforeDateNoAlbum()
+    {
+        $client = static::createClient();
+        $date = new \DateTime();
+        $interval = new \DateInterval('PT1M');
+        $date->sub($interval);
+
+        $client->request(
+            'GET',
+            '/album/list',
+            array('before' => $date->format(\DateTime::ISO8601)),
+            array(),
+            array(
+                'HTTP_X_AUTH_TOKEN' => self::$token
+            )
+        );
+
+        $this->assertEquals(404, $client->getResponse()->getStatusCode());
+        $json = json_decode($client->getResponse()->getContent(), true);
+
+        $this->assertEquals($json['message'], 'There is no album before this date.');
+    }
+
+    /**
+     * @depends testPostAlbum
+     */
     public function testGetAlbumsInvalidDate()
     {
         $client = static::createClient();

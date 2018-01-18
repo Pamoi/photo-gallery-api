@@ -95,7 +95,7 @@ class PhotoControllerTest extends CommandWebTestCase
         // Get the album back
         $client->request(
             'GET',
-            '/album/list',
+            '/album/list/1',
             array(),
             array(),
             array(
@@ -219,7 +219,7 @@ class PhotoControllerTest extends CommandWebTestCase
 
         $client->request(
             'GET',
-            '/album/list',
+            '/album/list/1',
             array(),
             array(),
             array(
@@ -256,7 +256,7 @@ class PhotoControllerTest extends CommandWebTestCase
 
         $client->request(
             'GET',
-            '/album/list',
+            '/album/list/1',
             array(),
             array(),
             array(
@@ -292,7 +292,7 @@ class PhotoControllerTest extends CommandWebTestCase
 
         $client->request(
             'GET',
-            '/album/list',
+            '/album/list/1',
             array(),
             array(),
             array(
@@ -342,7 +342,7 @@ class PhotoControllerTest extends CommandWebTestCase
 
         $client->request(
             'GET',
-            '/album/list',
+            '/album/list/1',
             array(),
             array(),
             array(
