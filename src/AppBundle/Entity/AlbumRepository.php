@@ -3,6 +3,7 @@
 namespace AppBundle\Entity;
 
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Query\ResultSetMapping;
 
 /**
  * UserRepository
@@ -45,5 +46,23 @@ class AlbumRepository extends EntityRepository
             ->setParameter('date', $date)
             ->getQuery()
             ->getResult();
+    }
+
+    /**
+     * Get an album at random. IMPORTANT: The underlying SQL query is very inefficient, consider replacing it
+     * if running it on a large table !
+     *
+     * @return Album
+     */
+    public function getRandomAlbum()
+    {
+        $rsm = new ResultSetMapping();
+        $rsm->addScalarResult('id', 'id');
+
+        $query = $this->getEntityManager()
+            ->createNativeQuery('SELECT id FROM albums ORDER BY RAND() LIMIT 1', $rsm);
+        $id = $query->getResult()[0]['id'];
+
+        return $this->find($id);
     }
 }

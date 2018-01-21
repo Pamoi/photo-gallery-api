@@ -299,6 +299,31 @@ class AlbumControllerTest extends CommandWebTestCase
     /**
      * @depends testPostAlbum
      */
+    public function testGetRandomAlbum()
+    {
+        $client = static::createClient();
+
+        $client->request(
+            'GET',
+            '/album/random',
+            array(),
+            array(),
+            array(
+                'HTTP_X_AUTH_TOKEN' => self::$token
+            )
+        );
+
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+
+        $json = json_decode($client->getResponse()->getContent(), true);
+
+        $this->assertEquals(static::$albumId, $json['id']);
+        $this->assertEquals('The title', $json['title']);
+    }
+
+    /**
+     * @depends testPostAlbum
+     */
     public function testSearchAlbum()
     {
         $client = static::createClient();

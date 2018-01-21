@@ -33,6 +33,28 @@ class AlbumController extends Controller
     }
 
     /**
+     * @Route("/album/random")
+     * @Method({"GET", "OPTIONS"})
+     */
+    public function getRandomAlbumAction(Request $request)
+    {
+        $repo = $this->getDoctrine()->getRepository('AppBundle:Album');
+        $maxIterations = 20;
+        $i = 0;
+
+        do {
+            $album = $repo->getRandomAlbum();
+            $i++;
+        } while (!$this->isGranted('view', $album) && $i <= $maxIterations);
+
+        if ($album) {
+            return new JsonResponse($album->toJson());
+        } else {
+            return new JsonResponse(array('message' => 'No album found'), 404);
+        }
+    }
+
+    /**
      * @Route("/album/list")
      * @Method({"GET", "OPTIONS"})
      */
