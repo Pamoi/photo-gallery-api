@@ -3,7 +3,7 @@
 use Symfony\Component\HttpFoundation\Request;
 
 // Below line was manually added and is not part of Symfony
-// error_reporting(0);
+error_reporting(0);
 
 /**
  * @var Composer\Autoload\ClassLoader

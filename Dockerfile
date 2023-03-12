@@ -19,4 +19,6 @@ COPY . /code
 
 RUN chmod a+rwx /code/var/cache /code/var/logs
 
+EXPOSE 80/tcp
+
 # docker run -it -p 8001:80 -v "$PWD/app/config/parameters.yml:/code/app/config/parameters.yml" gallery-api
